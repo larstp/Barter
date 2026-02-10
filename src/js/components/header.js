@@ -74,7 +74,7 @@ function createLogoLink() {
  */
 function createProfileLink(user) {
   const link = document.createElement('a');
-  link.href = '/src/pages/profile.html';
+  link.href = '/src/pages/user.html';
   link.className =
     'flex items-center justify-end transition-transform hover:scale-105';
 

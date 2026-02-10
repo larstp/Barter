@@ -120,9 +120,9 @@ export function renderNavbar() {
     },
     {
       icon: `${prefix}/public/icons/flowbite_user-circle-solid.svg`,
-      href: `${prefix}/src/pages/profile.html`,
+      href: `${prefix}/src/pages/user.html`,
       ariaLabel: 'Go to profile',
-      page: 'profile.html',
+      page: 'user.html',
     },
   ];
 
