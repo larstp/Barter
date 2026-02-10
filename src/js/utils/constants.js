@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   auth: {
     register: `${API_AUTH_BASE}/register`,
     login: `${API_AUTH_BASE}/login`,
+    createApiKey: `${API_AUTH_BASE}/create-api-key`,
   },
   auction: {
     listings: `${API_AUCTION_BASE}/listings`,
@@ -16,4 +17,5 @@ export const API_ENDPOINTS = {
 export const STORAGE_KEYS = {
   token: 'accessToken',
   user: 'user',
+  apiKey: 'apiKey',
 };

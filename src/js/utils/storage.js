@@ -47,7 +47,22 @@ export function removeUser() {
   sessionStorage.removeItem(STORAGE_KEYS.user);
 }
 
+export function saveApiKey(apiKey, remember = true) {
+  const storage = getStorage(remember);
+  storage.setItem(STORAGE_KEYS.apiKey, apiKey);
+}
+
+export function getApiKey() {
+  return getFromBothStorages(STORAGE_KEYS.apiKey);
+}
+
+export function removeApiKey() {
+  localStorage.removeItem(STORAGE_KEYS.apiKey);
+  sessionStorage.removeItem(STORAGE_KEYS.apiKey);
+}
+
 export function clearStorage() {
   removeToken();
   removeUser();
+  removeApiKey();
 }

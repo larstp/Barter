@@ -1,8 +1,9 @@
 import { API_ENDPOINTS } from '../utils/constants.js';
-import { getToken } from '../utils/storage.js';
+import { getToken, getApiKey } from '../utils/storage.js';
 
 export async function placeBid(listingId, amount) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const response = await fetch(
     `${API_ENDPOINTS.auction.listings}/${listingId}/bids`,
@@ -11,6 +12,7 @@ export async function placeBid(listingId, amount) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': apiKey,
       },
       body: JSON.stringify({ amount }),
     }
