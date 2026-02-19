@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '../utils/constants.js';
 import { saveToken, saveUser, saveApiKey } from '../utils/storage.js';
+import { getProfile } from './profile.js';
 
 export async function register(name, email, password) {
   const response = await fetch(API_ENDPOINTS.auth.register, {
@@ -62,14 +63,27 @@ export async function login(email, password, remember = true) {
       console.log('API Key created successfully:', apiKey);
       saveApiKey(apiKey, remember);
       console.log('API Key saved to storage');
+
+      const profileData = await getProfile(data.data.name);
+      const profile = profileData.data;
+
+      // AAAAH
+      const completeUserData = {
+        ...data.data,
+        credits: profile.credits,
+        avatar: profile.avatar,
+        banner: profile.banner,
+        bio: profile.bio,
+      };
+
+      saveUser(completeUserData, remember);
+      console.log('User profile data saved with credits:', profile.credits);
     } catch (error) {
       console.error('Failed to create API key:', error);
-      // Re-throw to alert user
       throw new Error('Failed to create API key. Please try logging in again.');
     }
-  }
-
-  if (data.data) {
+  } else if (data.data) {
+    // Fallback if no access token (shouldn't happen)
     saveUser(data.data, remember);
   }
 

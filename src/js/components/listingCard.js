@@ -35,7 +35,7 @@ export function createListingCard(listing) {
 
     const article = document.createElement('article');
     article.className =
-      'overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md hover:shadow-xl';
+      'flex flex-col overflow-hidden transition-all duration-300 ease-in-out bg-white rounded-lg shadow-lg hover:bg-cool-steel-100 hover:shadow-xl hover:scale-[1.02]';
     article.setAttribute('data-listing-id', listing.id);
 
     const header = document.createElement('div');
@@ -92,12 +92,13 @@ export function createListingCard(listing) {
 
     const listingLink = document.createElement('a');
     listingLink.href = `${prefix}/src/pages/listing-detail.html?id=${listing.id}`;
-    listingLink.className = 'block no-underline';
+    listingLink.className = 'flex-1 block no-underline';
     listingLink.setAttribute('aria-label', `View listing: ${listing.title}`);
 
     if (listing.media && listing.media.length > 0 && listing.media[0]?.url) {
       const mediaContainer = document.createElement('div');
-      mediaContainer.className = 'w-full h-48 overflow-hidden bg-cool-steel-100';
+      mediaContainer.className =
+        'w-full h-48 overflow-hidden bg-cool-steel-100';
 
       const img = document.createElement('img');
       img.src = listing.media[0].url;
@@ -131,7 +132,8 @@ export function createListingCard(listing) {
 
     if (listing.description) {
       const description = document.createElement('p');
-      description.className = 'm-0 mb-4 text-sm leading-relaxed text-cool-steel-700 line-clamp-2';
+      description.className =
+        'm-0 mb-4 text-sm leading-relaxed text-cool-steel-700 line-clamp-2';
       const truncatedDesc =
         listing.description.length > 100
           ? listing.description.substring(0, 100) + '...'
@@ -144,10 +146,10 @@ export function createListingCard(listing) {
     article.appendChild(listingLink);
 
     const footer = document.createElement('div');
-    footer.className = 'px-4 pb-4';
+    footer.className = 'px-4 pb-4 mt-auto';
 
     const detailsContainer = document.createElement('div');
-    detailsContainer.className = 'flex items-center justify-between gap-4 mb-3';
+    detailsContainer.className = 'flex justify-between gap-4 mb-3 items-top';
 
     const timeContainer = document.createElement('div');
     timeContainer.className = 'flex flex-col';
@@ -169,9 +171,7 @@ export function createListingCard(listing) {
 
     const bidCount = listing.bids?.length || 0;
     const currentBid =
-      bidCount > 0
-        ? Math.max(...listing.bids.map((bid) => bid.amount))
-        : 0;
+      bidCount > 0 ? Math.max(...listing.bids.map((bid) => bid.amount)) : 0;
 
     const bidLabel = document.createElement('span');
     bidLabel.className = 'mb-1 text-xs text-cool-steel-600';
@@ -195,7 +195,10 @@ export function createListingCard(listing) {
     detailsButton.href = `${prefix}/src/pages/listing-detail.html?id=${listing.id}`;
     detailsButton.className =
       'block w-full text-center px-4 py-2 bg-blue-slate-600 text-white rounded-lg text-sm font-semibold no-underline transition-all duration-300 hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0';
-    detailsButton.setAttribute('aria-label', `View details for ${listing.title}`);
+    detailsButton.setAttribute(
+      'aria-label',
+      `View details for ${listing.title}`
+    );
     detailsButton.textContent = 'See Auction Details';
     footer.appendChild(detailsButton);
 

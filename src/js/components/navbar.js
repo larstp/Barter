@@ -20,7 +20,7 @@ function createNavItem(item) {
   const link = document.createElement('a');
   link.href = item.href;
   link.className =
-    'flex items-center justify-center p-4 no-underline transition-colors duration-300';
+    'flex items-center justify-center p-2 no-underline transition-colors duration-300';
 
   if (isActive) {
     link.className += ' bg-white/10 rounded-full';
@@ -70,7 +70,7 @@ function openSearch() {
  *
  * @description
  * Creates a floating mobile navigation bar with:
- * - Five navigation icons (Home, Search, Add, Wishlist, Profile)
+ * - Five navigation icons (Home, All Auctions, Add, Search, Profile)
  * - Active page indicator
  * - Mobile-only (hidden on desktop)
  * - Only visible when user is logged in
@@ -87,7 +87,7 @@ export function renderNavbar() {
 
   const navbar = document.createElement('nav');
   navbar.className =
-    'fixed z-50 flex items-center justify-around gap-2 px-4 py-3 border rounded-lg shadow-2xl bottom-6 left-1 right-1 lg:hidden bg-blue-slate-700/90 backdrop-blur-md border-white/10';
+    'fixed z-50 flex items-center justify-around gap-2 px-4 py-1 border rounded-lg shadow-2xl bottom-6 left-1 right-1 lg:hidden bg-blue-slate-700/90 backdrop-blur-md border-white/10';
   navbar.setAttribute('role', 'navigation');
   navbar.setAttribute('aria-label', 'Mobile navigation');
 
@@ -99,11 +99,10 @@ export function renderNavbar() {
       page: 'index.html',
     },
     {
-      icon: `${prefix}/public/icons/flowbite_search-solid.svg`,
-      href: '#',
-      ariaLabel: 'Search',
-      page: 'search',
-      onClick: openSearch,
+      icon: `${prefix}/public/icons/streamline_justice-hammer-solid.svg`,
+      href: `${prefix}/src/pages/listings.html`,
+      ariaLabel: 'View all auctions',
+      page: 'listings.html',
     },
     {
       icon: `${prefix}/public/icons/flowbite_circle-plus-solid.svg`,
@@ -113,10 +112,11 @@ export function renderNavbar() {
       isCenter: true,
     },
     {
-      icon: `${prefix}/public/icons/flowbite_heart-solid.svg`,
-      href: `${prefix}/src/pages/wishlist.html`,
-      ariaLabel: 'View wishlist',
-      page: 'wishlist.html',
+      icon: `${prefix}/public/icons/flowbite_search-solid.svg`,
+      href: '#',
+      ariaLabel: 'Search',
+      page: 'search',
+      onClick: openSearch,
     },
     {
       icon: `${prefix}/public/icons/flowbite_user-circle-solid.svg`,
