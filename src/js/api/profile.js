@@ -1,19 +1,26 @@
 import { API_ENDPOINTS } from '../utils/constants.js';
-import { getToken } from '../utils/storage.js';
+import { getToken, getApiKey } from '../utils/storage.js';
 
 export async function getProfile(name) {
   const token = getToken();
+  const apiKey = getApiKey();
+
+  console.log('Fetching profile with token:', token ? 'Present' : 'Missing');
+  console.log('Fetching profile with API key:', apiKey ? apiKey : 'Missing');
 
   const response = await fetch(
     `${API_ENDPOINTS.auction.profiles}/${name}?_listings=true&_wins=true`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': apiKey,
       },
     }
   );
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Profile fetch failed:', response.status, errorData);
     throw new Error('Failed to fetch profile');
   }
 
@@ -22,12 +29,14 @@ export async function getProfile(name) {
 
 export async function updateProfile(name, profileData) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const response = await fetch(`${API_ENDPOINTS.auction.profiles}/${name}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      'X-Noroff-API-Key': apiKey,
     },
     body: JSON.stringify(profileData),
   });
@@ -42,6 +51,7 @@ export async function updateProfile(name, profileData) {
 
 export async function getProfileListings(name, limit = 12, page = 1) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const params = new URLSearchParams({
     limit: limit.toString(),
@@ -54,6 +64,7 @@ export async function getProfileListings(name, limit = 12, page = 1) {
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': apiKey,
       },
     }
   );
@@ -67,6 +78,7 @@ export async function getProfileListings(name, limit = 12, page = 1) {
 
 export async function getProfileBids(name, limit = 12, page = 1) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const params = new URLSearchParams({
     limit: limit.toString(),
@@ -79,6 +91,7 @@ export async function getProfileBids(name, limit = 12, page = 1) {
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': apiKey,
       },
     }
   );

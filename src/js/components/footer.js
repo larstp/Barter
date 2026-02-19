@@ -1,3 +1,5 @@
+import { clearStorage } from '../utils/storage.js';
+
 /**
  * Creates a clickable footer link (non-functional, for display only)
  * @param {string} text - The link text to display
@@ -53,6 +55,20 @@ export function renderFooter() {
   rightFooterLinks.forEach((linkText) => {
     rightLinks.appendChild(createFooterLink(linkText));
   });
+
+  //    ------------------------------------------------------- Added  logout button for testing remove later!
+  const logoutLink = document.createElement('span');
+  logoutLink.className =
+    'text-sm transition-colors cursor-pointer text-cool-steel-700 hover:text-blue-slate-700 hover:underline';
+  logoutLink.textContent = 'Log Out';
+  logoutLink.setAttribute('aria-label', 'Log Out');
+  logoutLink.setAttribute('role', 'button');
+  logoutLink.setAttribute('tabindex', '0');
+  logoutLink.addEventListener('click', () => {
+    clearStorage();
+    window.location.href = '/';
+  });
+  rightLinks.appendChild(logoutLink);
 
   const logoContainer = document.createElement('div');
   logoContainer.className = 'items-center justify-center hidden lg:flex';

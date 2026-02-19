@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from '../utils/constants.js';
-import { getToken } from '../utils/storage.js';
+import { getToken, getApiKey } from '../utils/storage.js';
 
 export async function getListings(
   limit = 12,
@@ -7,6 +7,8 @@ export async function getListings(
   tag = '',
   active = true
 ) {
+  const apiKey = getApiKey();
+
   const params = new URLSearchParams({
     limit: limit.toString(),
     page: page.toString(),
@@ -22,7 +24,14 @@ export async function getListings(
     params.append('_active', active.toString());
   }
 
-  const response = await fetch(`${API_ENDPOINTS.auction.listings}?${params}`);
+  const headers = {};
+  if (apiKey) {
+    headers['X-Noroff-API-Key'] = apiKey;
+  }
+
+  const response = await fetch(`${API_ENDPOINTS.auction.listings}?${params}`, {
+    headers,
+  });
 
   if (!response.ok) {
     throw new Error('Failed to fetch listings');
@@ -32,8 +41,16 @@ export async function getListings(
 }
 
 export async function getListing(id) {
+  const apiKey = getApiKey();
+
+  const headers = {};
+  if (apiKey) {
+    headers['X-Noroff-API-Key'] = apiKey;
+  }
+
   const response = await fetch(
-    `${API_ENDPOINTS.auction.listings}/${id}?_seller=true&_bids=true`
+    `${API_ENDPOINTS.auction.listings}/${id}?_seller=true&_bids=true`,
+    { headers }
   );
 
   if (!response.ok) {
@@ -45,12 +62,14 @@ export async function getListing(id) {
 
 export async function createListing(listingData) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const response = await fetch(API_ENDPOINTS.auction.listings, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      'X-Noroff-API-Key': apiKey,
     },
     body: JSON.stringify(listingData),
   });
@@ -65,12 +84,14 @@ export async function createListing(listingData) {
 
 export async function updateListing(id, listingData) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const response = await fetch(`${API_ENDPOINTS.auction.listings}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
+      'X-Noroff-API-Key': apiKey,
     },
     body: JSON.stringify(listingData),
   });
@@ -85,11 +106,13 @@ export async function updateListing(id, listingData) {
 
 export async function deleteListing(id) {
   const token = getToken();
+  const apiKey = getApiKey();
 
   const response = await fetch(`${API_ENDPOINTS.auction.listings}/${id}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
+      'X-Noroff-API-Key': apiKey,
     },
   });
 
@@ -99,8 +122,16 @@ export async function deleteListing(id) {
 }
 
 export async function searchListings(query) {
+  const apiKey = getApiKey();
+  const headers = {};
+
+  if (apiKey) {
+    headers['X-Noroff-API-Key'] = apiKey;
+  }
+
   const response = await fetch(
-    `${API_ENDPOINTS.auction.listings}/search?q=${encodeURIComponent(query)}&_seller=true&_bids=true`
+    `${API_ENDPOINTS.auction.listings}/search?q=${encodeURIComponent(query)}&_seller=true&_bids=true`,
+    { headers }
   );
 
   if (!response.ok) {
