@@ -1,6 +1,6 @@
 import { initializePage } from '../utils/main.js';
 import { getProfile, updateProfile } from '../api/profile.js';
-import { getUser } from '../utils/storage.js';
+import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 
 initializePage({ includeLogoBackground: true });
@@ -167,6 +167,19 @@ async function displayEditProfile() {
 
         if (Object.keys(updateData).length > 0) {
           await updateProfile(currentUser.name, updateData);
+
+          const updatedProfileResponse = await getProfile(currentUser.name);
+          const updatedProfile = updatedProfileResponse.data;
+
+          // -------------------------------------------------------- Merge with existing user data and save. Needs TESTING
+          const remember = localStorage.getItem('token') ? true : false;
+          const updatedUser = {
+            ...currentUser,
+            avatar: updatedProfile.avatar,
+            banner: updatedProfile.banner,
+            bio: updatedProfile.bio,
+          };
+          saveUser(updatedUser, remember);
         }
 
         updateLoader.remove();
