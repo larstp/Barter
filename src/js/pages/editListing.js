@@ -1,27 +1,81 @@
-import { createListing } from '../api/listings.js';
+import { getListing, updateListing } from '../api/listings.js';
 import { initializePage } from '../utils/main.js';
 import { getUser } from '../utils/storage.js';
+import { createLoader } from '../components/loader.js';
 
-// Check if user is logged in
 const user = getUser();
 if (!user) {
   window.location.href = '/src/pages/login.html';
 } else {
   initializePage();
-  renderCreateListingForm();
+  loadAndRenderEditForm();
 }
 
 /**
- * Renders the create listing form
+ * Loads the listing data and renders the edit form
  */
-function renderCreateListingForm() {
+async function loadAndRenderEditForm() {
+  const main = document.querySelector('main');
+  if (!main) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const listingId = urlParams.get('id');
+
+  if (!listingId) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'p-4 text-center text-petal-frost-600';
+    errorDiv.textContent = 'No listing ID specified';
+    main.appendChild(errorDiv);
+    return;
+  }
+
+  const loader = createLoader('Loading listing...');
+  main.appendChild(loader);
+
+  try {
+    const response = await getListing(listingId);
+    const listing = response.data;
+
+    loader.remove();
+
+    if (!listing) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'p-4 text-center text-petal-frost-600';
+      errorDiv.textContent = 'Listing not found';
+      main.appendChild(errorDiv);
+      return;
+    }
+
+    const currentUser = getUser();
+    if (!currentUser || listing.seller?.name !== currentUser.name) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'p-4 text-center text-petal-frost-600';
+      errorDiv.textContent = 'You can only edit your own listings';
+      main.appendChild(errorDiv);
+      return;
+    }
+
+    renderEditListingForm(listing, listingId);
+  } catch (error) {
+    console.error('Error loading listing:', error);
+    loader.remove();
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'p-4 text-center text-petal-frost-600';
+    errorDiv.textContent = 'Failed to load listing';
+    main.appendChild(errorDiv);
+  }
+}
+
+/**
+ * Renders the edit listing form with pre-filled data
+ */
+function renderEditListingForm(listing, listingId) {
   const main = document.querySelector('main');
   if (!main) return;
 
   const container = document.createElement('div');
   container.className = 'max-w-[800px] mx-auto px-[10%] py-8 md:px-4';
 
-  // -------------------------------------------------------------------------------------------  Back button if it woooorks
   const backButton = document.createElement('button');
   backButton.className =
     'flex items-center justify-center p-0 mb-6 transition-all duration-200 ease-in-out cursor-pointer hover:scale-110';
@@ -44,39 +98,45 @@ function renderCreateListingForm() {
   const heading = document.createElement('h1');
   heading.className =
     'mb-8 text-3xl font-semibold text-blue-slate-900 font-display';
-  heading.textContent = 'Create New Auction';
+  heading.textContent = 'Edit Auction';
   container.appendChild(heading);
 
   const form = document.createElement('form');
   form.className = 'flex flex-col gap-6';
+
+  // ------------------------------------------------------------ TEST pre filling by adding listing.title and listing.description to the createFormGroup function calls
 
   const titleGroup = createFormGroup(
     'title',
     'Title',
     'input',
     'Enter auction title',
-    true
+    true,
+    listing.title
   );
   form.appendChild(titleGroup);
 
-  // -----------------------------------------------------------------Description field (optional)
   const descriptionGroup = createFormGroup(
     'description',
     'Description',
     'textarea',
     'Describe your item...',
-    false
+    false,
+    listing.description || ''
   );
   form.appendChild(descriptionGroup);
 
-  // ------------------------------------------------------------------------End date field (required)
-  const endDateGroup = createEndDateField();
-  form.appendChild(endDateGroup);
+  // -------------------------------------------------------------- Note about end date because i cant figure this out
+  const endDateNote = document.createElement('div');
+  endDateNote.className =
+    'p-3 text-sm border rounded-lg text-cool-steel-700 border-cool-steel-300 bg-cool-steel-50';
+  endDateNote.textContent = 'Note: End date cannot be changed after creation';
+  form.appendChild(endDateNote);
 
-  const tagsSection = createTagsSection();
+  const tagsSection = createTagsSection(listing.tags || []);
   form.appendChild(tagsSection);
 
-  const mediaSection = createMediaSection();
+  const mediaSection = createMediaSection(listing.media || []);
   form.appendChild(mediaSection);
 
   const errorContainer = document.createElement('div');
@@ -88,10 +148,12 @@ function renderCreateListingForm() {
   submitButton.type = 'submit';
   submitButton.className =
     'w-full px-6 py-3 mt-4 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
-  submitButton.textContent = 'Create Auction';
+  submitButton.textContent = 'Update Auction';
   form.appendChild(submitButton);
 
-  form.addEventListener('submit', handleFormSubmit);
+  form.addEventListener('submit', (event) =>
+    handleFormSubmit(event, listingId)
+  );
 
   container.appendChild(form);
   main.appendChild(container);
@@ -100,7 +162,7 @@ function renderCreateListingForm() {
 /**
  * Creates a form group with label and input
  */
-function createFormGroup(id, label, type, placeholder, required) {
+function createFormGroup(id, label, type, placeholder, required, value = '') {
   const group = document.createElement('div');
   group.className = 'flex flex-col gap-2';
 
@@ -114,9 +176,11 @@ function createFormGroup(id, label, type, placeholder, required) {
   if (type === 'textarea') {
     input = document.createElement('textarea');
     input.rows = 5;
+    input.value = value;
   } else {
     input = document.createElement('input');
     input.type = type;
+    input.value = value;
   }
 
   input.id = id;
@@ -131,44 +195,9 @@ function createFormGroup(id, label, type, placeholder, required) {
 }
 
 /**
- * Creates the end date field with validation
- */
-function createEndDateField() {
-  const group = document.createElement('div');
-  group.className = 'flex flex-col gap-2';
-
-  const label = document.createElement('label');
-  label.htmlFor = 'endsAt';
-  label.className = 'text-sm font-semibold text-blue-slate-900';
-  label.textContent = 'End Date & Time *';
-  group.appendChild(label);
-
-  const input = document.createElement('input');
-  input.type = 'datetime-local';
-  input.id = 'endsAt';
-  input.name = 'endsAt';
-  input.required = true;
-  input.className =
-    'p-3 border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
-
-  // ----------------------------------------------------------------- Set min to current tidspunkt
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  input.min = now.toISOString().slice(0, 16);
-
-  const hint = document.createElement('span');
-  hint.className = 'text-xs text-cool-steel-600';
-  hint.textContent = 'Auction must end in the future';
-  group.appendChild(input);
-  group.appendChild(hint);
-
-  return group;
-}
-
-/**
  * Creates the tags section with add/remove functionality
  */
-function createTagsSection() {
+function createTagsSection(existingTags = []) {
   const section = document.createElement('div');
   section.className = 'flex flex-col gap-2';
 
@@ -209,6 +238,27 @@ function createTagsSection() {
   tagsDisplay.id = 'tags-display';
   tagsDisplay.className = 'flex flex-wrap gap-2 mt-2';
   section.appendChild(tagsDisplay);
+
+  existingTags.forEach((tagValue) => {
+    const tag = document.createElement('div');
+    tag.className =
+      'flex items-center gap-2 px-3 py-1 text-sm font-medium rounded-full bg-blue-slate-100 text-blue-slate-700';
+    tag.dataset.value = tagValue;
+
+    const tagText = document.createElement('span');
+    tagText.textContent = tagValue;
+    tag.appendChild(tagText);
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className =
+      'transition-colors text-blue-slate-700 hover:text-blue-slate-900';
+    removeButton.textContent = '×';
+    removeButton.addEventListener('click', () => tag.remove());
+    tag.appendChild(removeButton);
+
+    tagsDisplay.appendChild(tag);
+  });
 
   return section;
 }
@@ -251,9 +301,9 @@ function addTag(input) {
 }
 
 /**
- * -------Creates the media section with add/remove functionality hopefully :D
+ * Creates the media section with add/remove functionality
  */
-function createMediaSection() {
+function createMediaSection(existingMedia = []) {
   const section = document.createElement('div');
   section.className = 'flex flex-col gap-2';
 
@@ -275,17 +325,21 @@ function createMediaSection() {
   addButton.addEventListener('click', () => addMediaField(mediaList));
   section.appendChild(addButton);
 
-  //  --------------------------------------------------- Add one media field by default (TEST!)
-  addMediaField(mediaList);
+  if (existingMedia.length > 0) {
+    existingMedia.forEach((media) => {
+      addMediaField(mediaList, media.url, media.alt || '');
+    });
+  } else {
+    addMediaField(mediaList);
+  }
 
   return section;
 }
 
 /**
  * Adds a media input field
- * @param {HTMLElement} mediaList - The media list container (optional, will lookup if not provided)
  */
-function addMediaField(mediaList) {
+function addMediaField(mediaList, urlValue = '', altValue = '') {
   if (!mediaList) {
     mediaList = document.getElementById('media-list');
   }
@@ -297,6 +351,7 @@ function addMediaField(mediaList) {
   const urlInput = document.createElement('input');
   urlInput.type = 'url';
   urlInput.placeholder = 'Image URL (https://...)';
+  urlInput.value = urlValue;
   urlInput.className =
     'p-2 bg-white border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
   mediaItem.appendChild(urlInput);
@@ -304,6 +359,7 @@ function addMediaField(mediaList) {
   const altInput = document.createElement('input');
   altInput.type = 'text';
   altInput.placeholder = 'Alt text (optional)';
+  altInput.value = altValue;
   altInput.className =
     'p-2 bg-white border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
   mediaItem.appendChild(altInput);
@@ -322,7 +378,7 @@ function addMediaField(mediaList) {
 /**
  * Handles form submission
  */
-async function handleFormSubmit(event) {
+async function handleFormSubmit(event, listingId) {
   event.preventDefault();
 
   const form = event.target;
@@ -334,7 +390,6 @@ async function handleFormSubmit(event) {
 
   const title = form.title.value.trim();
   const description = form.description.value.trim();
-  const endsAt = form.endsAt.value;
 
   const tagsDisplay = document.getElementById('tags-display');
   const tags = Array.from(tagsDisplay.children).map((tag) => tag.dataset.value);
@@ -355,15 +410,8 @@ async function handleFormSubmit(event) {
     })
     .filter((item) => item !== null);
 
-  const endDate = new Date(endsAt);
-  if (endDate <= new Date()) {
-    showError('End date must be in the future');
-    return;
-  }
-
   const listingData = {
     title,
-    endsAt: endDate.toISOString(),
   };
 
   if (description) {
@@ -380,21 +428,16 @@ async function handleFormSubmit(event) {
 
   try {
     submitButton.disabled = true;
-    submitButton.textContent = 'Creating...';
+    submitButton.textContent = 'Updating...';
 
-    const response = await createListing(listingData);
+    await updateListing(listingId, listingData);
 
-    // --------------------------------------------------------------------  Redirect to the newly created listing
-    if (response.data?.id) {
-      window.location.href = `/src/pages/listing-detail.html?id=${response.data.id}`;
-    } else {
-      window.location.href = '/src/pages/listings.html';
-    }
+    window.location.href = `/src/pages/listing-detail.html?id=${listingId}`;
   } catch (error) {
-    console.error('Error creating listing:', error);
-    showError(error.message || 'Failed to create auction. Please try again.');
+    console.error('Error updating listing:', error);
+    showError(error.message || 'Failed to update auction. Please try again.');
     submitButton.disabled = false;
-    submitButton.textContent = 'Create Auction';
+    submitButton.textContent = 'Update Auction';
   }
 }
 

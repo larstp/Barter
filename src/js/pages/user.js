@@ -1,4 +1,4 @@
-import { getProfile } from '../api/profile.js';
+import { getProfile, getProfileBids } from '../api/profile.js';
 import { getUser, clearStorage, saveUser } from '../utils/storage.js';
 import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
@@ -203,33 +203,73 @@ async function displayUserProfile() {
     header.appendChild(info);
     main.appendChild(header);
 
+    // --------------------------------------Fetch bids data if viewing own profile. For showing "current bids" on profile page. will see if this should be moved to a separate "bids" page if it gets too cluttered
+    let userBids = [];
+    if (currentUser?.name === profileName) {
+      try {
+        const bidsData = await getProfileBids(profileName, 100, 1);
+        userBids = bidsData.data || [];
+      } catch (error) {
+        console.error('Error fetching bids:', error);
+      }
+    }
+
     const listingsSection = document.createElement('section');
     listingsSection.className =
       'max-w-[1200px] mt-8 mx-auto mb-0 px-4 pb-4 pt-0';
     listingsSection.setAttribute('aria-label', 'User listings');
 
-    const listingsHeader = document.createElement('h2');
-    listingsHeader.className =
-      'm-0 mb-6 text-xl font-semibold text-blue-slate-900 font-display';
-    listingsHeader.textContent = `Listings (${listingsCount})`;
-    listingsSection.appendChild(listingsHeader);
+    // Create tab navigation
+    const tabNav = document.createElement('div');
+    tabNav.className = 'flex gap-2 mb-6 border-b border-cool-steel-200';
 
-    if (profile.listings && profile.listings.length > 0) {
-      const listingsGrid = document.createElement('div');
-      listingsGrid.className =
-        'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
+    const tabs = [
+      { id: 'listings', label: 'Listings', count: listingsCount },
+      { id: 'wins', label: 'Won Auctions', count: winsCount },
+    ];
 
-      profile.listings.forEach((listing) => {
-        const listingCard = createListingCard(listing);
-        listingsGrid.appendChild(listingCard);
+    // -----------------------------------------------------Only show "Current Bids" tab if viewing own profile. TEST WITH OTHER PROFILES TO MAKE SURE IT DISAPPEARS WHY AM I SHOUTING?
+    if (currentUser?.name === profileName) {
+      tabs.push({
+        id: 'bids',
+        label: 'Current Bids',
+        count: userBids.length,
       });
-
-      listingsSection.appendChild(listingsGrid);
-    } else {
-      showNoListings(listingsSection);
     }
 
+    tabs.forEach((tab, index) => {
+      const tabButton = document.createElement('button');
+      tabButton.className = `px-4 py-2 font-semibold transition-all border-b-2 ${
+        index === 0
+          ? 'text-blue-slate-700 border-blue-slate-700'
+          : 'text-cool-steel-600 border-transparent hover:text-blue-slate-600'
+      }`;
+      tabButton.textContent = `${tab.label} (${tab.count})`;
+      tabButton.setAttribute('data-tab', tab.id);
+
+      tabButton.addEventListener('click', () => {
+        tabNav.querySelectorAll('button').forEach((btn) => {
+          btn.className = `px-4 py-2 font-semibold transition-all border-b-2 text-cool-steel-600 border-transparent hover:text-blue-slate-600`;
+        });
+        tabButton.className = `px-4 py-2 font-semibold transition-all border-b-2 text-blue-slate-700 border-blue-slate-700`;
+
+        showTabContent(tab.id, profile, userBids, currentUser, profileName);
+      });
+
+      tabNav.appendChild(tabButton);
+    });
+
+    listingsSection.appendChild(tabNav);
+
+    //  container
+    const contentContainer = document.createElement('div');
+    contentContainer.id = 'tab-content';
+    listingsSection.appendChild(contentContainer);
+
     main.appendChild(listingsSection);
+
+    // -----------------------------Show initial tab content (listings) as start tab
+    showTabContent('listings', profile, userBids, currentUser, profileName);
 
     if (currentUser?.name === profileName) {
       const logoutSection = document.createElement('section');
@@ -260,6 +300,122 @@ async function displayUserProfile() {
 }
 
 /**
+ * Shows the content for the selected tab
+ * @param {string} tabId - The ID of the tab to show
+ * @param {Object} profile - The profile data
+ * @param {Array} userBids - Array of user's bids
+ * @param {Object} currentUser - The currently logged-in user
+ * @param {string} profileName - The name of the profile being viewed
+ */
+function showTabContent(tabId, profile, userBids, currentUser, profileName) {
+  const contentContainer = document.getElementById('tab-content');
+  if (!contentContainer) return;
+
+  while (contentContainer.firstChild) {
+    contentContainer.removeChild(contentContainer.firstChild);
+  }
+
+  if (tabId === 'listings') {
+    if (profile.listings && profile.listings.length > 0) {
+      const listingsGrid = document.createElement('div');
+      listingsGrid.className =
+        'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
+
+      profile.listings.forEach((listing) => {
+        const listingCard = createListingCard(listing);
+        listingsGrid.appendChild(listingCard);
+      });
+
+      contentContainer.appendChild(listingsGrid);
+    } else {
+      showEmptyState(contentContainer, 'No active listings');
+    }
+  } else if (tabId === 'wins') {
+    if (profile.wins && profile.wins.length > 0) {
+      const winsGrid = document.createElement('div');
+      winsGrid.className =
+        'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
+
+      profile.wins.forEach((listing) => {
+        const listingCard = createListingCard(listing);
+        winsGrid.appendChild(listingCard);
+      });
+
+      contentContainer.appendChild(winsGrid);
+    } else {
+      showEmptyState(contentContainer, 'No won auctions yet');
+    }
+  } else if (tabId === 'bids') {
+    if (userBids && userBids.length > 0) {
+      const bidsGrid = document.createElement('div');
+      bidsGrid.className =
+        'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
+
+      userBids.forEach((bid) => {
+        if (bid.listing) {
+          const listingCard = createBidListingCard(bid, currentUser.name);
+          bidsGrid.appendChild(listingCard);
+        }
+      });
+
+      contentContainer.appendChild(bidsGrid);
+    } else {
+      showEmptyState(contentContainer, 'No active bids');
+    }
+  }
+}
+
+/**
+ * Creates a listing card for a bid with winning/losing indicator
+ * @param {Object} bid - The bid object with listing data
+ * @param {string} userName - The current user's name
+ * @returns {HTMLElement} The listing card element
+ */
+function createBidListingCard(bid, userName) {
+  const listing = bid.listing;
+  const card = createListingCard(listing);
+
+  //------------------------------------------  is user winning? (had help with this from full stack friend)
+  const allBids = listing.bids || [];
+  const highestBid =
+    allBids.length > 0 ? Math.max(...allBids.map((b) => b.amount)) : 0;
+  const userBid = bid.amount;
+  const isWinning = userBid >= highestBid;
+
+  const indicator = document.createElement('div');
+  indicator.className = `absolute top-0 left-0 right-0 px-4 py-2 text-sm font-semibold text-white ${
+    isWinning ? 'bg-celadon-600' : 'bg-petal-frost-600'
+  }`;
+  indicator.textContent = isWinning ? '✓ Winning bid' : '⚠ Outbid';
+
+  card.style.position = 'relative';
+  card.insertBefore(indicator, card.firstChild);
+
+  card.className += ` border-2 ${
+    isWinning ? 'border-celadon-400' : 'border-petal-frost-400'
+  }`;
+
+  return card;
+}
+
+/**
+ * Shows an empty state message
+ * @param {HTMLElement} container - The container element
+ * @param {string} message - The message to display
+ */
+function showEmptyState(container, message) {
+  const empty = document.createElement('div');
+  empty.className =
+    'flex flex-col items-center gap-4 max-w-[300px] mx-auto text-center py-12 px-4 text-cool-steel-600';
+
+  const emptyText = document.createElement('p');
+  emptyText.textContent = message;
+  empty.appendChild(emptyText);
+
+  container.appendChild(empty);
+}
+
+/**
  * Shows an error message
  * @param {HTMLElement} container - The container element
  * @param {string} message - The error message
@@ -273,27 +429,11 @@ function showError(container, message) {
 }
 
 /**
- * Shows a "no listings" message
- * @param {HTMLElement} container - The container element
- */
-function showNoListings(container) {
-  const empty = document.createElement('div');
-  empty.className =
-    'flex flex-col items-center gap-8 max-w-[300px] mx-auto text-center py-12 px-4 text-cool-steel-600';
-
-  const emptyText = document.createElement('p');
-  emptyText.textContent = 'No active listings';
-  empty.appendChild(emptyText);
-
-  container.appendChild(empty);
-}
-
-/**
  * Updates the credits display in the header
  * @param {number} credits - The new credits count
  */
 function updateHeaderCredits(credits) {
-  // Find all credit text elements in the header (mobile and desktop)
+  //------------------------------------------------- Find all credit text elements in the header (mobile and desktop)
   const header = document.querySelector('header');
   if (!header) return;
 
@@ -303,11 +443,9 @@ function updateHeaderCredits(credits) {
 
   creditsElements.forEach((element) => {
     const text = element.textContent;
-    // Mobile version is just the number
     if (!text.includes('Credits:')) {
       element.textContent = credits.toLocaleString();
     } else {
-      // Desktop version includes "Credits:" label
       element.textContent = `Credits: ${credits.toLocaleString()}`;
     }
   });
