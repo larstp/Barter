@@ -5,7 +5,9 @@ export async function getListings(
   limit = 12,
   page = 1,
   tag = '',
-  active = true
+  active = true,
+  sort = 'created',
+  sortOrder = 'desc'
 ) {
   const apiKey = getApiKey();
 
@@ -22,6 +24,15 @@ export async function getListings(
 
   if (active !== undefined) {
     params.append('_active', active.toString());
+  }
+
+  // -------------------------------------------Add sort parameters if works
+  if (sort) {
+    params.append('sort', sort);
+  }
+
+  if (sortOrder) {
+    params.append('sortOrder', sortOrder);
   }
 
   const headers = {};

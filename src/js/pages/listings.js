@@ -2,10 +2,13 @@ import { getListings } from '../api/listings.js';
 import { initializePage } from '../utils/main.js';
 import { createListingCard } from '../components/listingCard.js';
 import { createLoader } from '../components/loader.js';
+import { createBackButton } from '../components/backButton.js';
 
 initializePage();
 
 let currentPage = 1;
+let currentSort = 'created';
+let currentSortOrder = 'desc'; // Default: Newest First (so far, might change)
 
 /**
  * Displays the listings feed on the listings page
@@ -38,25 +41,9 @@ async function displayListingsFeed(page = 1) {
       'listings-feed max-w-[1200px] mx-auto px-[10%] py-8 md:px-4';
 
     const headerContainer = document.createElement('div');
-    headerContainer.className = 'flex items-center justify-between mb-8';
+    headerContainer.className = 'flex items-center justify-between mb-6';
 
-    const backButton = document.createElement('button');
-    backButton.className =
-      'flex items-center justify-center p-0 transition-all duration-200 ease-in-out cursor-pointer hover:scale-110';
-    backButton.setAttribute('aria-label', 'Go back to previous page');
-
-    const backIcon = document.createElement('img');
-    backIcon.src = '../../public/icons/flowbite_arrow-right-alt-outline.svg';
-    backIcon.alt = '';
-    backIcon.className = 'w-5 h-5';
-    backIcon.style.filter =
-      'invert(18%) sepia(20%) saturate(2200%) hue-rotate(178deg) brightness(90%) contrast(95%)';
-    backButton.appendChild(backIcon);
-
-    backButton.addEventListener('click', () => {
-      window.history.back();
-    });
-
+    const backButton = createBackButton();
     headerContainer.appendChild(backButton);
 
     const heading = document.createElement('h1');
@@ -71,11 +58,67 @@ async function displayListingsFeed(page = 1) {
 
     feedContainer.appendChild(headerContainer);
 
+    // --------------------------------------------------------------------Sorting dropdown
+    const sortContainer = document.createElement('div');
+    sortContainer.className = 'flex items-center justify-end gap-3 mb-6';
+
+    const sortLabel = document.createElement('label');
+    sortLabel.htmlFor = 'sort-select';
+    sortLabel.className = 'text-sm font-semibold text-blue-slate-900';
+    sortLabel.textContent = 'Sort by:';
+    sortContainer.appendChild(sortLabel);
+
+    const sortSelect = document.createElement('select');
+    sortSelect.id = 'sort-select';
+    sortSelect.className =
+      'p-2 pr-8 border rounded-lg border-cool-steel-300 text-blue-slate-900 bg-white cursor-pointer focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+
+    const sortOptions = [
+      { value: 'created-desc', label: 'Newest First' },
+      { value: 'created-asc', label: 'Oldest First' },
+      { value: 'endsAt-asc', label: 'Ending Soon' },
+      { value: 'endsAt-desc', label: 'Ending Later' },
+      { value: 'price-asc', label: 'Price: Low to High' },
+      { value: 'price-desc', label: 'Price: High to Low' },
+    ];
+
+    sortOptions.forEach((option) => {
+      const optionEl = document.createElement('option');
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      if (option.value === `${currentSort}-${currentSortOrder}`) {
+        optionEl.selected = true;
+      }
+      sortSelect.appendChild(optionEl);
+    });
+
+    sortSelect.addEventListener('change', (e) => {
+      const [sort, sortOrder] = e.target.value.split('-');
+      currentSort = sort;
+      currentSortOrder = sortOrder;
+      currentPage = 1; // Reset to first page
+      displayListingsFeed(1);
+    });
+
+    sortContainer.appendChild(sortSelect);
+    feedContainer.appendChild(sortContainer);
+
     const loader = createLoader('Loading auctions...');
     feedContainer.appendChild(loader);
     main.appendChild(feedContainer);
 
-    const response = await getListings(12, page);
+    // -------------------------------For price sorting, we don't pass it to API (we'll sort client-side because i dont know how else to make it work)
+    const apiSort = currentSort === 'price' ? 'created' : currentSort;
+    const apiSortOrder = currentSort === 'price' ? 'desc' : currentSortOrder;
+
+    const response = await getListings(
+      12,
+      page,
+      '',
+      true,
+      apiSort,
+      apiSortOrder
+    );
 
     loader.remove();
 
@@ -88,11 +131,31 @@ async function displayListingsFeed(page = 1) {
       return;
     }
 
+    let listings = response.data;
+
+    // Client-side sorting for price (Got help from fullstack friend here also. These math functions dont work in my head)
+    if (currentSort === 'price') {
+      listings = listings.sort((a, b) => {
+        const aBids = a.bids || [];
+        const bBids = b.bids || [];
+        const aHighestBid =
+          aBids.length > 0 ? Math.max(...aBids.map((bid) => bid.amount)) : 0;
+        const bHighestBid =
+          bBids.length > 0 ? Math.max(...bBids.map((bid) => bid.amount)) : 0;
+
+        if (currentSortOrder === 'asc') {
+          return aHighestBid - bHighestBid;
+        } else {
+          return bHighestBid - aHighestBid;
+        }
+      });
+    }
+
     const grid = document.createElement('div');
     grid.className =
       'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-    response.data.forEach((listing) => {
+    listings.forEach((listing) => {
       const listingCard = createListingCard(listing);
       grid.appendChild(listingCard);
     });
