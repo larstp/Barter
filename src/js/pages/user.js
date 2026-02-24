@@ -83,13 +83,13 @@ async function displayUserProfile() {
     const backButton = createBackButton();
     backButton.className =
       'absolute z-10 flex items-center justify-center w-10 h-10 p-0 transition-all duration-200 ease-in-out border rounded-full cursor-pointer top-4 left-4 bg-black/50 backdrop-blur-md border-white/10 hover:bg-black/70 hover:scale-105';
-    
+
     // Override icon color to white for visibility on banner
     const backIcon = backButton.querySelector('img');
     if (backIcon) {
       backIcon.className = 'w-5 h-5 brightness-0 invert';
     }
-    
+
     banner.appendChild(backButton);
 
     if (currentUser?.name === profileName) {

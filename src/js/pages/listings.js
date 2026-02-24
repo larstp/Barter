@@ -71,7 +71,7 @@ async function displayListingsFeed(page = 1) {
     const sortSelect = document.createElement('select');
     sortSelect.id = 'sort-select';
     sortSelect.className =
-      'p-2 pr-8 border rounded-lg border-cool-steel-300 text-blue-slate-900 bg-white cursor-pointer focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+      'p-2 pr-8 font-sans bg-white border rounded-lg cursor-pointer border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
 
     const sortOptions = [
       { value: 'created-desc', label: 'Newest First' },
