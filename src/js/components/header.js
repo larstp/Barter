@@ -1,4 +1,5 @@
 import { getUser } from '../utils/storage.js';
+import { initializeSearch, openSearch } from './searchModal.js';
 
 /**
  * Creates the credits display for mobile (icon + number)
@@ -162,7 +163,7 @@ function createWishlistLink(user) {
 }
 
 /**
- * Creates the search button placeholder for desktop navigation
+ * Creates the search button for desktop navigation
  * @returns {HTMLButtonElement} Search button
  */
 function createSearchButton() {
@@ -173,7 +174,7 @@ function createSearchButton() {
   button.textContent = 'Search';
 
   button.addEventListener('click', () => {
-    console.log('Search clicked - implement search functionality later');
+    openSearch();
   });
 
   return button;
@@ -229,6 +230,11 @@ function createDesktopNav(user, isLoginPage) {
  * @returns {HTMLElement} The header element
  */
 export function renderHeader() {
+  // Initialize search modal once with callback
+  initializeSearch((query) => {
+    window.location.href = `/src/pages/listings.html?search=${encodeURIComponent(query)}`;
+  });
+
   const user = getUser();
   const isLoginPage = window.location.pathname.includes('login.html');
 
