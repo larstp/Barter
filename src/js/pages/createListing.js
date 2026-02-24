@@ -242,7 +242,7 @@ function addTag(input) {
   removeButton.type = 'button';
   removeButton.className =
     'transition-colors text-blue-slate-700 hover:text-blue-slate-900';
-  removeButton.innerHTML = '&times;';
+  removeButton.textContent = '×';
   removeButton.addEventListener('click', () => tag.remove());
   tag.appendChild(removeButton);
 

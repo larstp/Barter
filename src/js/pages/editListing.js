@@ -22,8 +22,10 @@ async function loadAndRenderEditForm() {
   const listingId = urlParams.get('id');
 
   if (!listingId) {
-    main.innerHTML =
-      '<div class="p-4 text-center text-petal-frost-600">No listing ID specified</div>';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'p-4 text-center text-petal-frost-600';
+    errorDiv.textContent = 'No listing ID specified';
+    main.appendChild(errorDiv);
     return;
   }
 
@@ -37,15 +39,19 @@ async function loadAndRenderEditForm() {
     loader.remove();
 
     if (!listing) {
-      main.innerHTML =
-        '<div class="p-4 text-center text-petal-frost-600">Listing not found</div>';
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'p-4 text-center text-petal-frost-600';
+      errorDiv.textContent = 'Listing not found';
+      main.appendChild(errorDiv);
       return;
     }
 
     const currentUser = getUser();
     if (!currentUser || listing.seller?.name !== currentUser.name) {
-      main.innerHTML =
-        '<div class="p-4 text-center text-petal-frost-600">You can only edit your own listings</div>';
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'p-4 text-center text-petal-frost-600';
+      errorDiv.textContent = 'You can only edit your own listings';
+      main.appendChild(errorDiv);
       return;
     }
 
@@ -53,8 +59,10 @@ async function loadAndRenderEditForm() {
   } catch (error) {
     console.error('Error loading listing:', error);
     loader.remove();
-    main.innerHTML =
-      '<div class="p-4 text-center text-petal-frost-600">Failed to load listing</div>';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'p-4 text-center text-petal-frost-600';
+    errorDiv.textContent = 'Failed to load listing';
+    main.appendChild(errorDiv);
   }
 }
 
@@ -245,7 +253,7 @@ function createTagsSection(existingTags = []) {
     removeButton.type = 'button';
     removeButton.className =
       'transition-colors text-blue-slate-700 hover:text-blue-slate-900';
-    removeButton.innerHTML = '&times;';
+    removeButton.textContent = '×';
     removeButton.addEventListener('click', () => tag.remove());
     tag.appendChild(removeButton);
 
@@ -284,7 +292,7 @@ function addTag(input) {
   removeButton.type = 'button';
   removeButton.className =
     'transition-colors text-blue-slate-700 hover:text-blue-slate-900';
-  removeButton.innerHTML = '&times;';
+  removeButton.textContent = '×';
   removeButton.addEventListener('click', () => tag.remove());
   tag.appendChild(removeButton);
 
@@ -317,7 +325,6 @@ function createMediaSection(existingMedia = []) {
   addButton.addEventListener('click', () => addMediaField(mediaList));
   section.appendChild(addButton);
 
-  // Pre-fill existing media or add one empty field
   if (existingMedia.length > 0) {
     existingMedia.forEach((media) => {
       addMediaField(mediaList, media.url, media.alt || '');

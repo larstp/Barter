@@ -1,7 +1,8 @@
 import { getListing, deleteListing } from '../api/listings.js';
 import { placeBid } from '../api/bids.js';
+import { getProfile } from '../api/profile.js';
 import { initializePage } from '../utils/main.js';
-import { getUser } from '../utils/storage.js';
+import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { calculateTimeRemaining } from '../utils/helpers.js';
 
@@ -259,6 +260,18 @@ async function displayListingDetail() {
 
             await placeBid(listingId, bidAmount);
 
+            // Fetches and updates the profile with new credit count after bid
+            const currentUser = getUser();
+            const updatedProfile = await getProfile(currentUser.name);
+
+            const updatedUser = {
+              ...currentUser,
+              credits: updatedProfile.data.credits,
+            };
+
+            const remember = localStorage.getItem('accessToken') !== null;
+            saveUser(updatedUser, remember);
+
             window.location.reload();
           } catch (error) {
             console.error('Error placing bid:', error);
@@ -300,7 +313,7 @@ async function displayListingDetail() {
     contentGrid.appendChild(infoSection);
     container.appendChild(contentGrid);
 
-    // Bidding History Section
+    // ---------------------------------------- Bidding History Section. will see if design should be different
     if (listing.bids && listing.bids.length > 0) {
       const historySection = document.createElement('div');
       historySection.className = 'mt-12';
