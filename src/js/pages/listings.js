@@ -2,10 +2,14 @@ import { getListings } from '../api/listings.js';
 import { initializePage } from '../utils/main.js';
 import { createListingCard } from '../components/listingCard.js';
 import { createLoader } from '../components/loader.js';
+import { createBackButton } from '../components/backButton.js';
 
 initializePage();
 
 let currentPage = 1;
+let currentSort = 'created';
+let currentSortOrder = 'desc'; // Default: Newest First (so far, might change)
+let searchQuery = '';
 
 /**
  * Displays the listings feed on the listings page
@@ -20,6 +24,10 @@ async function displayListingsFeed(page = 1) {
       console.error('Main element not found');
       return;
     }
+
+    // ---------------------------------------------------Get search query from URL if there
+    const urlParams = new URLSearchParams(window.location.search);
+    searchQuery = urlParams.get('search') || '';
 
     const existingFeed = main.querySelector('.listings-feed');
     if (existingFeed) {
@@ -38,44 +46,105 @@ async function displayListingsFeed(page = 1) {
       'listings-feed max-w-[1200px] mx-auto px-[10%] py-8 md:px-4';
 
     const headerContainer = document.createElement('div');
-    headerContainer.className = 'flex items-center justify-between mb-8';
+    headerContainer.className = 'flex items-center justify-between mb-6';
 
-    const backButton = document.createElement('button');
-    backButton.className =
-      'flex items-center justify-center p-0 transition-all duration-200 ease-in-out cursor-pointer hover:scale-110';
-    backButton.setAttribute('aria-label', 'Go back to previous page');
-
-    const backIcon = document.createElement('img');
-    backIcon.src = '../../public/icons/flowbite_arrow-right-alt-outline.svg';
-    backIcon.alt = '';
-    backIcon.className = 'w-5 h-5';
-    backIcon.style.filter =
-      'invert(18%) sepia(20%) saturate(2200%) hue-rotate(178deg) brightness(90%) contrast(95%)';
-    backButton.appendChild(backIcon);
-
-    backButton.addEventListener('click', () => {
-      window.history.back();
-    });
-
+    const backButton = createBackButton();
     headerContainer.appendChild(backButton);
 
     const heading = document.createElement('h1');
     heading.className =
       'flex-1 text-3xl font-semibold text-center text-blue-slate-700 font-display';
-    heading.textContent = 'All Auctions';
+
+    if (searchQuery) {
+      heading.textContent = `Search: "${searchQuery}"`;
+    } else {
+      heading.textContent = 'All Auctions';
+    }
+
     headerContainer.appendChild(heading);
 
-    const spacer = document.createElement('div');
-    spacer.className = 'w-10';
-    headerContainer.appendChild(spacer);
+    // Add clear search button or spacer or whatever
+    if (searchQuery) {
+      const clearButton = document.createElement('button');
+      clearButton.className =
+        'px-3 py-1 text-sm font-semibold transition-all border rounded-lg text-blue-slate-700 border-blue-slate-300 hover:bg-blue-slate-50';
+      clearButton.textContent = 'Clear';
+      clearButton.addEventListener('click', () => {
+        window.location.href = '/src/pages/listings.html';
+      });
+      headerContainer.appendChild(clearButton);
+    } else {
+      const spacer = document.createElement('div');
+      spacer.className = 'w-10';
+      headerContainer.appendChild(spacer);
+    }
 
     feedContainer.appendChild(headerContainer);
+
+    // --------------------------------------------------------------------Sorting dropdown
+    const sortContainer = document.createElement('div');
+    sortContainer.className = 'flex items-center justify-end gap-3 mb-6';
+
+    const sortLabel = document.createElement('label');
+    sortLabel.htmlFor = 'sort-select';
+    sortLabel.className = 'text-sm font-semibold text-blue-slate-900';
+    sortLabel.textContent = 'Sort by:';
+    sortContainer.appendChild(sortLabel);
+
+    const sortSelect = document.createElement('select');
+    sortSelect.id = 'sort-select';
+    sortSelect.className =
+      'p-2 pr-8 font-sans bg-white border rounded-lg cursor-pointer border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+
+    const sortOptions = [
+      { value: 'created-desc', label: 'Newest First' },
+      { value: 'created-asc', label: 'Oldest First' },
+      { value: 'endsAt-asc', label: 'Ending Soon' },
+      { value: 'endsAt-desc', label: 'Ending Later' },
+      { value: 'price-asc', label: 'Price: Low to High' },
+      { value: 'price-desc', label: 'Price: High to Low' },
+    ];
+
+    sortOptions.forEach((option) => {
+      const optionEl = document.createElement('option');
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      if (option.value === `${currentSort}-${currentSortOrder}`) {
+        optionEl.selected = true;
+      }
+      sortSelect.appendChild(optionEl);
+    });
+
+    sortSelect.addEventListener('change', (e) => {
+      const [sort, sortOrder] = e.target.value.split('-');
+      currentSort = sort;
+      currentSortOrder = sortOrder;
+      currentPage = 1; // Reset to first page
+      displayListingsFeed(1);
+    });
+
+    sortContainer.appendChild(sortSelect);
+    feedContainer.appendChild(sortContainer);
 
     const loader = createLoader('Loading auctions...');
     feedContainer.appendChild(loader);
     main.appendChild(feedContainer);
 
-    const response = await getListings(12, page);
+    // -------------------------------For price sorting, we don't pass it to API (we'll sort client-side because i dont know how else to make it work)
+    const apiSort = currentSort === 'price' ? 'created' : currentSort;
+    const apiSortOrder = currentSort === 'price' ? 'desc' : currentSortOrder;
+
+    // -------------------When searching, fetch more listings to search through (100 instead of 12)
+    const limit = searchQuery ? 100 : 12;
+
+    const response = await getListings(
+      limit,
+      page,
+      '',
+      true,
+      apiSort,
+      apiSortOrder
+    );
 
     loader.remove();
 
@@ -88,19 +157,82 @@ async function displayListingsFeed(page = 1) {
       return;
     }
 
+    let listings = response.data;
+
+    // -------------------------------------------------------------- title and tag filtering
+    if (searchQuery) {
+      listings = listings.filter((listing) => {
+        const title = listing.title || '';
+        const tags = listing.tags || [];
+        const searchLower = searchQuery.toLowerCase();
+
+        const titleMatch = title.toLowerCase().includes(searchLower);
+        const tagMatch = tags.some((tag) =>
+          tag.toLowerCase().includes(searchLower)
+        );
+
+        return titleMatch || tagMatch;
+      });
+
+      if (listings.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className =
+          'flex flex-col items-center gap-4 max-w-[400px] mx-auto text-center py-12 px-4 text-cool-steel-600';
+
+        const message = document.createElement('p');
+        message.textContent = `No auctions found matching "${searchQuery}"`;
+        emptyMessage.appendChild(message);
+
+        const clearButton = document.createElement('button');
+        clearButton.className =
+          'px-4 py-2 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700';
+        clearButton.textContent = 'Clear Search';
+        clearButton.addEventListener('click', () => {
+          window.location.href = '/src/pages/listings.html';
+        });
+        emptyMessage.appendChild(clearButton);
+
+        feedContainer.appendChild(emptyMessage);
+        return;
+      }
+    }
+
+    // Client-side sorting for price (Got help from fullstack friend here also. These math functions dont work in my head)
+    if (currentSort === 'price') {
+      listings = listings.sort((a, b) => {
+        const aBids = a.bids || [];
+        const bBids = b.bids || [];
+        const aHighestBid =
+          aBids.length > 0 ? Math.max(...aBids.map((bid) => bid.amount)) : 0;
+        const bHighestBid =
+          bBids.length > 0 ? Math.max(...bBids.map((bid) => bid.amount)) : 0;
+
+        if (currentSortOrder === 'asc') {
+          return aHighestBid - bHighestBid;
+        } else {
+          return bHighestBid - aHighestBid;
+        }
+      });
+    }
+
     const grid = document.createElement('div');
     grid.className =
       'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-    response.data.forEach((listing) => {
+    listings.forEach((listing) => {
       const listingCard = createListingCard(listing);
       grid.appendChild(listingCard);
     });
 
     feedContainer.appendChild(grid);
 
+    // Only show pagination when not searching
     const meta = response.meta;
-    if (meta && (meta.isFirstPage === false || meta.isLastPage === false)) {
+    if (
+      !searchQuery &&
+      meta &&
+      (meta.isFirstPage === false || meta.isLastPage === false)
+    ) {
       const paginationContainer = document.createElement('div');
       paginationContainer.className =
         'flex items-center justify-center gap-4 px-0 py-8 mt-12';

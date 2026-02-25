@@ -1,4 +1,5 @@
 import { getUser } from '../utils/storage.js';
+import { initializeSearch, openSearch } from './searchModal.js';
 
 /**
  * Creates a navigation item for the mobile navbar
@@ -57,11 +58,11 @@ function createNavItem(item) {
 }
 
 /**
- * Opens the search functionality (placeholder)
+ * Opens the search modal
  * @returns {void}
  */
-function openSearch() {
-  console.log('Search functionality - to be implemented');
+function openSearchHandler() {
+  openSearch();
 }
 
 /**
@@ -76,6 +77,11 @@ function openSearch() {
  * - Only visible when user is logged in
  */
 export function renderNavbar() {
+  // Initialize search modal once with callback
+  initializeSearch((query) => {
+    window.location.href = `/src/pages/listings.html?search=${encodeURIComponent(query)}`;
+  });
+
   const user = getUser();
 
   if (!user) {
@@ -116,7 +122,7 @@ export function renderNavbar() {
       href: '#',
       ariaLabel: 'Search',
       page: 'search',
-      onClick: openSearch,
+      onClick: openSearchHandler,
     },
     {
       icon: `${prefix}/public/icons/flowbite_user-circle-solid.svg`,

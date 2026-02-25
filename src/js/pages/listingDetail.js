@@ -5,6 +5,8 @@ import { initializePage } from '../utils/main.js';
 import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { calculateTimeRemaining } from '../utils/helpers.js';
+import { createBackButton } from '../components/backButton.js';
+import { createImageCarousel } from '../components/imageCarousel.js';
 
 initializePage();
 
@@ -47,47 +49,14 @@ async function displayListingDetail() {
     const container = document.createElement('div');
     container.className = 'max-w-[1200px] mx-auto px-[10%] py-8 lg:px-4';
 
-    const backButton = document.createElement('button');
-    backButton.className =
-      'flex items-center justify-center p-0 mb-6 transition-all duration-200 ease-in-out cursor-pointer hover:scale-110';
-    backButton.setAttribute('aria-label', 'Go back to previous page');
-
-    const backIcon = document.createElement('img');
-    backIcon.src = '../../public/icons/flowbite_arrow-right-alt-outline.svg';
-    backIcon.alt = '';
-    backIcon.className = 'w-5 h-5';
-    backIcon.style.filter =
-      'invert(18%) sepia(20%) saturate(2200%) hue-rotate(178deg) brightness(90%) contrast(95%)';
-    backButton.appendChild(backIcon);
-
-    backButton.addEventListener('click', () => {
-      window.history.back();
-    });
-
+    const backButton = createBackButton();
+    backButton.className += ' mb-6';
     container.appendChild(backButton);
 
     const contentGrid = document.createElement('div');
     contentGrid.className = 'grid grid-cols-1 gap-8 lg:grid-cols-2';
 
-    const imageSection = document.createElement('div');
-    imageSection.className = 'flex flex-col gap-4';
-
-    if (listing.media && listing.media.length > 0 && listing.media[0]?.url) {
-      const mainImage = document.createElement('img');
-      mainImage.src = listing.media[0].url;
-      mainImage.alt = listing.media[0].alt || listing.title;
-      mainImage.className = 'object-cover w-full rounded-lg bg-cool-steel-100';
-      imageSection.appendChild(mainImage);
-    } else {
-      const placeholder = document.createElement('div');
-      placeholder.className =
-        'flex items-center justify-center w-full rounded-lg h-96 bg-cool-steel-100';
-      const placeholderText = document.createElement('span');
-      placeholderText.className = 'text-cool-steel-400';
-      placeholderText.textContent = 'No image available';
-      placeholder.appendChild(placeholderText);
-      imageSection.appendChild(placeholder);
-    }
+    const imageSection = createImageCarousel(listing.media, listing.title);
 
     contentGrid.appendChild(imageSection);
 

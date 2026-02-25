@@ -3,6 +3,7 @@ import { getUser, clearStorage, saveUser } from '../utils/storage.js';
 import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
 import { createListingCard } from '../components/listingCard.js';
+import { createBackButton } from '../components/backButton.js';
 
 // Check if user is logged in, if not - straight to jail (login screen)
 const user = getUser();
@@ -79,20 +80,15 @@ async function displayUserProfile() {
       banner.appendChild(bannerImage);
     }
 
-    const backButton = document.createElement('button');
+    const backButton = createBackButton();
     backButton.className =
       'absolute z-10 flex items-center justify-center w-10 h-10 p-0 transition-all duration-200 ease-in-out border rounded-full cursor-pointer top-4 left-4 bg-black/50 backdrop-blur-md border-white/10 hover:bg-black/70 hover:scale-105';
-    backButton.setAttribute('aria-label', 'Go back to previous page');
 
-    const backIcon = document.createElement('img');
-    backIcon.src = '../../public/icons/flowbite_arrow-right-alt-outline.svg';
-    backIcon.alt = '';
-    backIcon.className = 'w-5 h-5 brightness-0 invert';
-    backButton.appendChild(backIcon);
-
-    backButton.addEventListener('click', () => {
-      window.history.back();
-    });
+    // Override icon color to white for visibility on banner
+    const backIcon = backButton.querySelector('img');
+    if (backIcon) {
+      backIcon.className = 'w-5 h-5 brightness-0 invert';
+    }
 
     banner.appendChild(backButton);
 
