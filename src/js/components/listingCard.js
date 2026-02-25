@@ -1,4 +1,3 @@
-import { getUser } from '../utils/storage.js';
 import { calculateTimeRemaining } from '../utils/helpers.js';
 
 /**
@@ -31,7 +30,6 @@ export function createListingCard(listing) {
   try {
     const isRootPage = !window.location.pathname.includes('/src/pages/');
     const prefix = isRootPage ? '.' : '../..';
-    const currentUser = getUser();
 
     const article = document.createElement('article');
     article.className =

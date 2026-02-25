@@ -249,7 +249,7 @@ async function displayUserProfile() {
         });
         tabButton.className = `px-4 py-2 font-semibold transition-all border-b-2 text-blue-slate-700 border-blue-slate-700`;
 
-        showTabContent(tab.id, profile, userBids, currentUser, profileName);
+        showTabContent(tab.id, profile, userBids);
       });
 
       tabNav.appendChild(tabButton);
@@ -265,7 +265,7 @@ async function displayUserProfile() {
     main.appendChild(listingsSection);
 
     // -----------------------------Show initial tab content (listings) as start tab
-    showTabContent('listings', profile, userBids, currentUser, profileName);
+    showTabContent('listings', profile, userBids);
 
     if (currentUser?.name === profileName) {
       const logoutSection = document.createElement('section');
@@ -300,10 +300,8 @@ async function displayUserProfile() {
  * @param {string} tabId - The ID of the tab to show
  * @param {Object} profile - The profile data
  * @param {Array} userBids - Array of user's bids
- * @param {Object} currentUser - The currently logged-in user
- * @param {string} profileName - The name of the profile being viewed
  */
-function showTabContent(tabId, profile, userBids, currentUser, profileName) {
+function showTabContent(tabId, profile, userBids) {
   const contentContainer = document.getElementById('tab-content');
   if (!contentContainer) return;
 
@@ -365,7 +363,7 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 
       userBids.forEach((bid) => {
         if (bid.listing) {
-          const listingCard = createBidListingCard(bid, currentUser.name);
+          const listingCard = createBidListingCard(bid);
           bidsGrid.appendChild(listingCard);
         }
       });
@@ -380,10 +378,9 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 /**
  * Creates a listing card for a bid with winning/losing indicator
  * @param {Object} bid - The bid object with listing data
- * @param {string} userName - The current user's name
  * @returns {HTMLElement} The listing card element
  */
-function createBidListingCard(bid, userName) {
+function createBidListingCard(bid) {
   const listing = bid.listing;
   const card = createListingCard(listing);
 

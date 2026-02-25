@@ -77,7 +77,12 @@ export async function login(email, password, remember = true) {
       saveUser(completeUserData, remember);
     } catch (error) {
       console.error('Failed to create API key:', error);
-      throw new Error('Failed to create API key. Please try logging in again.');
+      throw new Error(
+        'Failed to create API key. Please try logging in again.',
+        {
+          cause: error,
+        }
+      );
     }
   } else if (data.data) {
     // Fallback if no access token (shouldn't happen)
