@@ -6,6 +6,7 @@ import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { calculateTimeRemaining } from '../utils/helpers.js';
 import { createBackButton } from '../components/backButton.js';
+import { createImageCarousel } from '../components/imageCarousel.js';
 
 initializePage();
 
@@ -55,25 +56,7 @@ async function displayListingDetail() {
     const contentGrid = document.createElement('div');
     contentGrid.className = 'grid grid-cols-1 gap-8 lg:grid-cols-2';
 
-    const imageSection = document.createElement('div');
-    imageSection.className = 'flex flex-col gap-4';
-
-    if (listing.media && listing.media.length > 0 && listing.media[0]?.url) {
-      const mainImage = document.createElement('img');
-      mainImage.src = listing.media[0].url;
-      mainImage.alt = listing.media[0].alt || listing.title;
-      mainImage.className = 'object-cover w-full rounded-lg bg-cool-steel-100';
-      imageSection.appendChild(mainImage);
-    } else {
-      const placeholder = document.createElement('div');
-      placeholder.className =
-        'flex items-center justify-center w-full rounded-lg h-96 bg-cool-steel-100';
-      const placeholderText = document.createElement('span');
-      placeholderText.className = 'text-cool-steel-400';
-      placeholderText.textContent = 'No image available';
-      placeholder.appendChild(placeholderText);
-      imageSection.appendChild(placeholder);
-    }
+    const imageSection = createImageCarousel(listing.media, listing.title);
 
     contentGrid.appendChild(imageSection);
 
