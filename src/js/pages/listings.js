@@ -3,12 +3,14 @@ import { initializePage } from '../utils/main.js';
 import { createListingCard } from '../components/listingCard.js';
 import { createLoader } from '../components/loader.js';
 import { createBackButton } from '../components/backButton.js';
+import { PAGINATION_LIMITS } from '../utils/constants.js';
 
 initializePage();
 
 let currentPage = 1;
 let currentSort = 'created';
 let currentSortOrder = 'desc'; // Default: Newest First (so far, might change)
+let currentTag = ''; // Filter by tag
 let searchQuery = '';
 
 /**
@@ -81,15 +83,45 @@ async function displayListingsFeed(page = 1) {
 
     feedContainer.appendChild(headerContainer);
 
-    // --------------------------------------------------------------------Sorting dropdown
+    // --------------------------------------------------------------------Tag and Sorting dropdowns
     const sortContainer = document.createElement('div');
-    sortContainer.className = 'flex items-center justify-end gap-3 mb-6';
+    sortContainer.className = 'flex items-center justify-between gap-6 mb-6';
+    const tagFilterContainer = document.createElement('div');
+    tagFilterContainer.className = 'flex items-center gap-3';
+
+    const tagLabel = document.createElement('label');
+    tagLabel.htmlFor = 'tag-select';
+    tagLabel.className = 'text-sm font-semibold text-blue-slate-900';
+    tagLabel.textContent = 'Filter by most popular tags:';
+    tagFilterContainer.appendChild(tagLabel);
+
+    const tagSelect = document.createElement('select');
+    tagSelect.id = 'tag-select';
+    tagSelect.className =
+      'p-2 pr-8 font-sans bg-white border rounded-lg cursor-pointer border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+
+    const allTagsOption = document.createElement('option');
+    allTagsOption.value = '';
+    allTagsOption.textContent = 'All Tags';
+    tagSelect.appendChild(allTagsOption);
+
+    tagSelect.addEventListener('change', (e) => {
+      currentTag = e.target.value;
+      currentPage = 1;
+      displayListingsFeed(1);
+    });
+
+    tagFilterContainer.appendChild(tagSelect);
+    sortContainer.appendChild(tagFilterContainer);
+
+    const sortFilterContainer = document.createElement('div');
+    sortFilterContainer.className = 'flex items-center gap-3';
 
     const sortLabel = document.createElement('label');
     sortLabel.htmlFor = 'sort-select';
     sortLabel.className = 'text-sm font-semibold text-blue-slate-900';
     sortLabel.textContent = 'Sort by:';
-    sortContainer.appendChild(sortLabel);
+    sortFilterContainer.appendChild(sortLabel);
 
     const sortSelect = document.createElement('select');
     sortSelect.id = 'sort-select';
@@ -123,7 +155,8 @@ async function displayListingsFeed(page = 1) {
       displayListingsFeed(1);
     });
 
-    sortContainer.appendChild(sortSelect);
+    sortFilterContainer.appendChild(sortSelect);
+    sortContainer.appendChild(sortFilterContainer);
     feedContainer.appendChild(sortContainer);
 
     const loader = createLoader('Loading auctions...');
@@ -134,8 +167,10 @@ async function displayListingsFeed(page = 1) {
     const apiSort = currentSort === 'price' ? 'created' : currentSort;
     const apiSortOrder = currentSort === 'price' ? 'desc' : currentSortOrder;
 
-    // -------------------When searching, fetch more listings to search through (100 instead of 12)
-    const limit = searchQuery ? 100 : 12;
+    // When searching, fetch more listings to search through
+    const limit = searchQuery
+      ? PAGINATION_LIMITS.SEARCH
+      : PAGINATION_LIMITS.DEFAULT; // --- MUCH easier
 
     const response = await getListings(
       limit,
@@ -158,6 +193,64 @@ async function displayListingsFeed(page = 1) {
     }
 
     let listings = response.data;
+
+    const tagCounts = {};
+    listings.forEach((listing) => {
+      if (listing.tags && listing.tags.length > 0) {
+        listing.tags.forEach((tag) => {
+          if (tag) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const sortedTags = Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag]) => tag);
+
+    if (tagSelect.options.length === 1) {
+      // ugh this thing is killing me
+      sortedTags.forEach((tag) => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        if (tag === currentTag) {
+          option.selected = true;
+        }
+        tagSelect.appendChild(option);
+      });
+    }
+
+    if (currentTag) {
+      listings = listings.filter(
+        (listing) => listing.tags && listing.tags.includes(currentTag)
+      );
+
+      if (listings.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className =
+          'flex flex-col items-center gap-4 max-w-[400px] mx-auto text-center py-12 px-4 text-cool-steel-600';
+
+        const message = document.createElement('p');
+        message.textContent = `No auctions found with tag "${currentTag}"`;
+        emptyMessage.appendChild(message);
+
+        const clearButton = document.createElement('button');
+        clearButton.className =
+          'px-4 py-2 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700';
+        clearButton.textContent = 'Clear Filter';
+        clearButton.addEventListener('click', () => {
+          currentTag = '';
+          displayListingsFeed(1);
+        });
+        emptyMessage.appendChild(clearButton);
+
+        feedContainer.appendChild(emptyMessage);
+        return;
+      }
+    }
 
     // -------------------------------------------------------------- title and tag filtering
     if (searchQuery) {

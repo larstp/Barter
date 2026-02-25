@@ -1,4 +1,4 @@
-import { getProfile, getProfileBids } from '../api/profile.js';
+import { getProfile, getProfileBids } from '../api/profile.js'; // not sure if this is the right way bit it seems to work. sorry it is VERY messy
 import { getUser, clearStorage, saveUser } from '../utils/storage.js';
 import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
@@ -249,7 +249,7 @@ async function displayUserProfile() {
         });
         tabButton.className = `px-4 py-2 font-semibold transition-all border-b-2 text-blue-slate-700 border-blue-slate-700`;
 
-        showTabContent(tab.id, profile, userBids, currentUser, profileName);
+        showTabContent(tab.id, profile, userBids);
       });
 
       tabNav.appendChild(tabButton);
@@ -265,7 +265,7 @@ async function displayUserProfile() {
     main.appendChild(listingsSection);
 
     // -----------------------------Show initial tab content (listings) as start tab
-    showTabContent('listings', profile, userBids, currentUser, profileName);
+    showTabContent('listings', profile, userBids);
 
     if (currentUser?.name === profileName) {
       const logoutSection = document.createElement('section');
@@ -300,10 +300,8 @@ async function displayUserProfile() {
  * @param {string} tabId - The ID of the tab to show
  * @param {Object} profile - The profile data
  * @param {Array} userBids - Array of user's bids
- * @param {Object} currentUser - The currently logged-in user
- * @param {string} profileName - The name of the profile being viewed
  */
-function showTabContent(tabId, profile, userBids, currentUser, profileName) {
+function showTabContent(tabId, profile, userBids) {
   const contentContainer = document.getElementById('tab-content');
   if (!contentContainer) return;
 
@@ -313,11 +311,27 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 
   if (tabId === 'listings') {
     if (profile.listings && profile.listings.length > 0) {
+      // ----------------active listings first, then expired ones (newest to oldest in each group) (super messy, but too exhausted)
+      const sortedListings = [...profile.listings].sort(
+        (listing1, listing2) => {
+          const now = new Date();
+          const listing1Expired = new Date(listing1.endsAt) < now;
+          const listing2Expired = new Date(listing2.endsAt) < now;
+
+          // ------------------------------If one is expired and one is active, active comes first
+          if (listing1Expired && !listing2Expired) return 1;
+          if (!listing1Expired && listing2Expired) return -1;
+
+          // -------------------------------------------If both same status, sort newest first
+          return new Date(listing2.created) - new Date(listing1.created);
+        }
+      );
+
       const listingsGrid = document.createElement('div');
       listingsGrid.className =
         'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-      profile.listings.forEach((listing) => {
+      sortedListings.forEach((listing) => {
         const listingCard = createListingCard(listing);
         listingsGrid.appendChild(listingCard);
       });
@@ -349,7 +363,7 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 
       userBids.forEach((bid) => {
         if (bid.listing) {
-          const listingCard = createBidListingCard(bid, currentUser.name);
+          const listingCard = createBidListingCard(bid);
           bidsGrid.appendChild(listingCard);
         }
       });
@@ -364,10 +378,9 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 /**
  * Creates a listing card for a bid with winning/losing indicator
  * @param {Object} bid - The bid object with listing data
- * @param {string} userName - The current user's name
  * @returns {HTMLElement} The listing card element
  */
-function createBidListingCard(bid, userName) {
+function createBidListingCard(bid) {
   const listing = bid.listing;
   const card = createListingCard(listing);
 

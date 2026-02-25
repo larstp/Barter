@@ -60,9 +60,7 @@ export async function login(email, password, remember = true) {
 
     try {
       const apiKey = await createApiKey(data.data.accessToken);
-      console.log('API Key created successfully:', apiKey);
       saveApiKey(apiKey, remember);
-      console.log('API Key saved to storage');
 
       const profileData = await getProfile(data.data.name);
       const profile = profileData.data;
@@ -77,10 +75,14 @@ export async function login(email, password, remember = true) {
       };
 
       saveUser(completeUserData, remember);
-      console.log('User profile data saved with credits:', profile.credits);
     } catch (error) {
       console.error('Failed to create API key:', error);
-      throw new Error('Failed to create API key. Please try logging in again.');
+      throw new Error(
+        'Failed to create API key. Please try logging in again.',
+        {
+          cause: error,
+        }
+      );
     }
   } else if (data.data) {
     // Fallback if no access token (shouldn't happen)

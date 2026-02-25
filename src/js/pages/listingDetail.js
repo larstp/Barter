@@ -1,6 +1,6 @@
 import { getListing, deleteListing } from '../api/listings.js';
 import { placeBid } from '../api/bids.js';
-import { getProfile } from '../api/profile.js';
+import { getProfile, getProfileListings } from '../api/profile.js';
 import { initializePage } from '../utils/main.js';
 import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
@@ -97,12 +97,24 @@ async function displayListingDetail() {
 
       const sellerStats = document.createElement('span');
       sellerStats.className = 'text-sm text-cool-steel-600';
-      const listingsCount = listing.seller._count?.listings || 0;
-      sellerStats.textContent = `${listingsCount} ${listingsCount === 1 ? 'listing' : 'listings'}`;
+      sellerStats.textContent = 'Loading...';
       sellerInfo.appendChild(sellerStats);
 
       sellerLink.appendChild(sellerInfo);
       infoSection.appendChild(sellerLink);
+
+      try {
+        const sellerListingsData = await getProfileListings(
+          listing.seller.name,
+          1,
+          1
+        ); // screw this thing i cant figure out why this wont work
+        const listingsCount = sellerListingsData.meta?.totalCount || 0;
+        sellerStats.textContent = `${listingsCount} ${listingsCount === 1 ? 'listing' : 'listings'}`;
+      } catch (error) {
+        console.error('Error fetching seller listings count:', error);
+        sellerStats.textContent = 'Listings';
+      }
     }
 
     const divider2 = document.createElement('hr');
@@ -272,7 +284,7 @@ async function displayListingDetail() {
         'px-6 py-3 font-semibold transition-all bg-white border rounded-lg border-cool-steel-300 text-blue-slate-700 hover:bg-cool-steel-50';
       wishlistButton.textContent = '♥ Add to Wishlist';
       wishlistButton.addEventListener('click', () => {
-        console.log('Wishlist functionality - to be implemented');
+        //---------------------------------------------------- TODOIF I HAVE TIME: Implement wishlist functionality
       });
       actionsSection.appendChild(wishlistButton);
     }
