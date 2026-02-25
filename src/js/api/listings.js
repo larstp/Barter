@@ -1,8 +1,8 @@
-import { API_ENDPOINTS } from '../utils/constants.js';
+import { API_ENDPOINTS, PAGINATION_LIMITS } from '../utils/constants.js';
 import { getToken, getApiKey } from '../utils/storage.js';
 
 export async function getListings(
-  limit = 12,
+  limit = PAGINATION_LIMITS.DEFAULT,
   page = 1,
   tag = '',
   active = true,

@@ -1,12 +1,9 @@
-import { API_ENDPOINTS } from '../utils/constants.js';
+import { API_ENDPOINTS, PAGINATION_LIMITS } from '../utils/constants.js';
 import { getToken, getApiKey } from '../utils/storage.js';
 
 export async function getProfile(name) {
   const token = getToken();
   const apiKey = getApiKey();
-
-  console.log('Fetching profile with token:', token ? 'Present' : 'Missing');
-  console.log('Fetching profile with API key:', apiKey ? apiKey : 'Missing');
 
   const response = await fetch(
     `${API_ENDPOINTS.auction.profiles}/${name}?_listings=true&_wins=true`,
@@ -49,7 +46,11 @@ export async function updateProfile(name, profileData) {
   return await response.json();
 }
 
-export async function getProfileListings(name, limit = 12, page = 1) {
+export async function getProfileListings(
+  name,
+  limit = PAGINATION_LIMITS.DEFAULT,
+  page = 1
+) {
   const token = getToken();
   const apiKey = getApiKey();
 
@@ -76,7 +77,11 @@ export async function getProfileListings(name, limit = 12, page = 1) {
   return await response.json();
 }
 
-export async function getProfileBids(name, limit = 12, page = 1) {
+export async function getProfileBids(
+  name,
+  limit = PAGINATION_LIMITS.DEFAULT,
+  page = 1
+) {
   const token = getToken();
   const apiKey = getApiKey();
 

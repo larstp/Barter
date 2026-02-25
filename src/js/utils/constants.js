@@ -53,3 +53,14 @@ export const STORAGE_KEYS = {
   user: 'user',
   apiKey: 'apiKey',
 };
+
+/**
+ * Pagination limits for API requests
+ * @constant {Object}
+ * @property {number} DEFAULT - Default number of items per page (12)
+ * @property {number} SEARCH - Number of items to fetch when searching (100)
+ */
+export const PAGINATION_LIMITS = {
+  DEFAULT: 21,
+  SEARCH: 100,
+};

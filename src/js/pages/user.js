@@ -1,4 +1,4 @@
-import { getProfile, getProfileBids } from '../api/profile.js';
+import { getProfile, getProfileBids } from '../api/profile.js'; // not sure if this is the right way bit it seems to work. sorry it is VERY messy
 import { getUser, clearStorage, saveUser } from '../utils/storage.js';
 import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
@@ -313,11 +313,27 @@ function showTabContent(tabId, profile, userBids, currentUser, profileName) {
 
   if (tabId === 'listings') {
     if (profile.listings && profile.listings.length > 0) {
+      // ----------------active listings first, then expired ones (newest to oldest in each group) (super messy, but too exhausted)
+      const sortedListings = [...profile.listings].sort(
+        (listing1, listing2) => {
+          const now = new Date();
+          const listing1Expired = new Date(listing1.endsAt) < now;
+          const listing2Expired = new Date(listing2.endsAt) < now;
+
+          // ------------------------------If one is expired and one is active, active comes first
+          if (listing1Expired && !listing2Expired) return 1;
+          if (!listing1Expired && listing2Expired) return -1;
+
+          // -------------------------------------------If both same status, sort newest first
+          return new Date(listing2.created) - new Date(listing1.created);
+        }
+      );
+
       const listingsGrid = document.createElement('div');
       listingsGrid.className =
         'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-      profile.listings.forEach((listing) => {
+      sortedListings.forEach((listing) => {
         const listingCard = createListingCard(listing);
         listingsGrid.appendChild(listingCard);
       });
