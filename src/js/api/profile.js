@@ -89,6 +89,7 @@ export async function getProfileBids(
     limit: limit.toString(),
     page: page.toString(),
     _listings: 'true',
+    _bids: 'true',
   });
 
   const response = await fetch(

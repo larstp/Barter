@@ -85,14 +85,15 @@ async function displayListingsFeed(page = 1) {
 
     // --------------------------------------------------------------------Tag and Sorting dropdowns
     const sortContainer = document.createElement('div');
-    sortContainer.className = 'flex items-center justify-between gap-6 mb-6';
+    sortContainer.className =
+      'flex flex-wrap items-center justify-between gap-4 mb-6';
     const tagFilterContainer = document.createElement('div');
     tagFilterContainer.className = 'flex items-center gap-3';
 
     const tagLabel = document.createElement('label');
     tagLabel.htmlFor = 'tag-select';
-    tagLabel.className = 'text-sm font-semibold text-blue-slate-900';
-    tagLabel.textContent = 'Filter by most popular tags:';
+    tagLabel.className = 'font-sans text-sm font-semibold text-blue-slate-900';
+    tagLabel.textContent = 'Filter by tags:';
     tagFilterContainer.appendChild(tagLabel);
 
     const tagSelect = document.createElement('select');
@@ -119,7 +120,7 @@ async function displayListingsFeed(page = 1) {
 
     const sortLabel = document.createElement('label');
     sortLabel.htmlFor = 'sort-select';
-    sortLabel.className = 'text-sm font-semibold text-blue-slate-900';
+    sortLabel.className = 'font-sans text-sm font-semibold text-blue-slate-900';
     sortLabel.textContent = 'Sort by:';
     sortFilterContainer.appendChild(sortLabel);
 
@@ -334,10 +335,28 @@ async function displayListingsFeed(page = 1) {
       const hasNextPage = meta.isLastPage === false;
 
       if (hasPrevPage) {
+        // making this work with the icon is proving to be a pain. im using hours on this..
         const prevBtn = document.createElement('button');
         prevBtn.className =
-          'bg-blue-slate-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 ease-in-out hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0 w-28';
-        prevBtn.textContent = 'Previous';
+          'relative flex items-center justify-center w-8 h-8 transition-transform duration-200 ease-in-out cursor-pointer hover:scale-110 group';
+        prevBtn.setAttribute('aria-label', 'Previous page');
+
+        const prevOutlineArrow = document.createElement('img');
+        prevOutlineArrow.src =
+          '../../public/icons/flowbite_arrow-right-alt-outline.svg';
+        prevOutlineArrow.alt = 'Previous';
+        prevOutlineArrow.className = 'w-8 h-8 group-hover:hidden';
+
+        const prevSolidArrow = document.createElement('img');
+        prevSolidArrow.src =
+          '../../public/icons/flowbite_arrow-right-alt-solid.svg';
+        prevSolidArrow.alt = 'Previous';
+        prevSolidArrow.className =
+          'absolute inset-0 hidden w-8 h-8 group-hover:block';
+
+        prevBtn.appendChild(prevOutlineArrow);
+        prevBtn.appendChild(prevSolidArrow);
+
         prevBtn.addEventListener('click', () => {
           currentPage--;
           displayListingsFeed(currentPage);
@@ -346,7 +365,7 @@ async function displayListingsFeed(page = 1) {
         paginationContainer.appendChild(prevBtn);
       } else {
         const spacer = document.createElement('div');
-        spacer.className = 'w-28';
+        spacer.className = 'w-8';
         paginationContainer.appendChild(spacer);
       }
 
@@ -358,8 +377,25 @@ async function displayListingsFeed(page = 1) {
       if (hasNextPage) {
         const nextBtn = document.createElement('button');
         nextBtn.className =
-          'bg-blue-slate-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 ease-in-out hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0 w-28';
-        nextBtn.textContent = 'Next';
+          'relative flex items-center justify-center w-8 h-8 transition-transform duration-200 ease-in-out cursor-pointer hover:scale-110 group';
+        nextBtn.setAttribute('aria-label', 'Next page');
+
+        const nextOutlineArrow = document.createElement('img');
+        nextOutlineArrow.src =
+          '../../public/icons/flowbite_arrow-right-alt-outline-1.svg';
+        nextOutlineArrow.alt = 'Next';
+        nextOutlineArrow.className = 'w-8 h-8 group-hover:hidden';
+
+        const nextSolidArrow = document.createElement('img');
+        nextSolidArrow.src =
+          '../../public/icons/flowbite_arrow-right-alt-solid-1.svg';
+        nextSolidArrow.alt = 'Next';
+        nextSolidArrow.className =
+          'absolute inset-0 hidden w-8 h-8 group-hover:block';
+
+        nextBtn.appendChild(nextOutlineArrow);
+        nextBtn.appendChild(nextSolidArrow);
+
         nextBtn.addEventListener('click', () => {
           currentPage++;
           displayListingsFeed(currentPage);
@@ -368,7 +404,7 @@ async function displayListingsFeed(page = 1) {
         paginationContainer.appendChild(nextBtn);
       } else {
         const spacer = document.createElement('div');
-        spacer.className = 'w-28';
+        spacer.className = 'w-8';
         paginationContainer.appendChild(spacer);
       }
 

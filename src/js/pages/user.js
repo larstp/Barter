@@ -144,6 +144,40 @@ async function displayUserProfile() {
       info.appendChild(bio);
     }
 
+    // --------------------------------------Fetch bids data if viewing own profile to calculate pending wins
+    let userBids = [];
+    let pendingWins = [];
+    if (currentUser?.name === profileName) {
+      try {
+        const bidsData = await getProfileBids(profileName, 100, 1);
+        const allBids = bidsData.data || [];
+        const now = new Date();
+
+        const wonListingIds = new Set(
+          (profile.wins || []).map((win) => win.id)
+        );
+
+        allBids.forEach((bid) => {
+          if (!bid.listing || !bid.listing.id || !bid.amount) return;
+
+          if (wonListingIds.has(bid.listing.id)) return;
+
+          const auctionEnded = new Date(bid.listing.endsAt) < now;
+
+          if (auctionEnded) {
+            // I CANT get the API to confirm that an auction is won immediately after it ends, its been 13 hours now and a auction i won still isn't registered as so. Not sure if im doing something wrong, but all i get from the API is:
+            // Ended auction details: {title: 'Knights', yourBid: 55, allBidsOnListing: Array(0), bidsCount: 0}allBidsOnListing: []bidsCount: 0
+            //Which gives me no way to know if the auction was won or lost. maybe because _bids: 'true' on the profile bids endpoint doesn't expand nested bids on the listing object, bot i dont know nearly enough to troubleshoot this. Currently the win tabs count all 'potential' wins.
+            pendingWins.push(bid.listing);
+          } else {
+            userBids.push(bid);
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching bids:', error);
+      }
+    }
+
     const stats = document.createElement('div');
     stats.className =
       'flex justify-center gap-8 text-base text-cool-steel-700 md:justify-start';
@@ -190,7 +224,7 @@ async function displayUserProfile() {
 
     const winsValue = document.createElement('span');
     winsValue.className = 'font-semibold text-blue-slate-900';
-    winsValue.textContent = winsCount;
+    winsValue.textContent = winsCount + pendingWins.length;
     wins.appendChild(winsValue);
 
     stats.appendChild(wins);
@@ -199,29 +233,21 @@ async function displayUserProfile() {
     header.appendChild(info);
     main.appendChild(header);
 
-    // --------------------------------------Fetch bids data if viewing own profile. For showing "current bids" on profile page. will see if this should be moved to a separate "bids" page if it gets too cluttered
-    let userBids = [];
-    if (currentUser?.name === profileName) {
-      try {
-        const bidsData = await getProfileBids(profileName, 100, 1);
-        userBids = bidsData.data || [];
-      } catch (error) {
-        console.error('Error fetching bids:', error);
-      }
-    }
-
     const listingsSection = document.createElement('section');
     listingsSection.className =
       'max-w-[1200px] mt-8 mx-auto mb-0 px-4 pb-4 pt-0';
     listingsSection.setAttribute('aria-label', 'User listings');
 
-    // Create tab navigation
     const tabNav = document.createElement('div');
     tabNav.className = 'flex gap-2 mb-6 border-b border-cool-steel-200';
 
     const tabs = [
       { id: 'listings', label: 'Listings', count: listingsCount },
-      { id: 'wins', label: 'Won Auctions', count: winsCount },
+      {
+        id: 'wins',
+        label: 'Wins',
+        count: winsCount + pendingWins.length,
+      },
     ];
 
     // -----------------------------------------------------Only show "Current Bids" tab if viewing own profile. TEST WITH OTHER PROFILES TO MAKE SURE IT DISAPPEARS WHY AM I SHOUTING?
@@ -249,7 +275,7 @@ async function displayUserProfile() {
         });
         tabButton.className = `px-4 py-2 font-semibold transition-all border-b-2 text-blue-slate-700 border-blue-slate-700`;
 
-        showTabContent(tab.id, profile, userBids);
+        showTabContent(tab.id, profile, userBids, pendingWins);
       });
 
       tabNav.appendChild(tabButton);
@@ -265,7 +291,7 @@ async function displayUserProfile() {
     main.appendChild(listingsSection);
 
     // -----------------------------Show initial tab content (listings) as start tab
-    showTabContent('listings', profile, userBids);
+    showTabContent('listings', profile, userBids, pendingWins);
 
     if (currentUser?.name === profileName) {
       const logoutSection = document.createElement('section');
@@ -300,8 +326,9 @@ async function displayUserProfile() {
  * @param {string} tabId - The ID of the tab to show
  * @param {Object} profile - The profile data
  * @param {Array} userBids - Array of user's bids
+ * @param {Array} pendingWins - Array of won auctions pending API sync
  */
-function showTabContent(tabId, profile, userBids) {
+function showTabContent(tabId, profile, userBids, pendingWins = []) {
   const contentContainer = document.getElementById('tab-content');
   if (!contentContainer) return;
 
@@ -341,12 +368,15 @@ function showTabContent(tabId, profile, userBids) {
       showEmptyState(contentContainer, 'No active listings');
     }
   } else if (tabId === 'wins') {
-    if (profile.wins && profile.wins.length > 0) {
+    // Combine official wins from API with pending wins calculated client-side
+    const allWins = [...(profile.wins || []), ...pendingWins];
+
+    if (allWins.length > 0) {
       const winsGrid = document.createElement('div');
       winsGrid.className =
         'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-      profile.wins.forEach((listing) => {
+      allWins.forEach((listing) => {
         const listingCard = createListingCard(listing);
         winsGrid.appendChild(listingCard);
       });
