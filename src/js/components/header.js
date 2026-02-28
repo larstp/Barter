@@ -144,19 +144,12 @@ function createAllAuctionsLink() {
 }
 
 /**
- * Creates the wishlist link for desktop navigation
- * @param {Object|null} user - The user object from storage
+ * Creates the wishlist link for desktop navigation (requires logged in user)
  * @returns {HTMLAnchorElement} Wishlist link
  */
-function createWishlistLink(user) {
+function createWishlistLink() {
   const link = document.createElement('a');
-  if (user) {
-    link.href = resolvePath('src/pages/wishlist.html');
-  } else {
-    link.href =
-      resolvePath('src/pages/login.html') +
-      `?redirect=${encodeURIComponent(resolvePath('src/pages/wishlist.html'))}`;
-  }
+  link.href = resolvePath('src/pages/wishlist.html');
   link.className =
     'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
   link.setAttribute('aria-label', 'Wishlist');
@@ -215,7 +208,9 @@ function createDesktopNav(user, isLoginPage) {
   nav.className = 'items-center hidden gap-2 lg:flex';
 
   nav.appendChild(createAllAuctionsLink());
-  nav.appendChild(createWishlistLink(user));
+  if (user) {
+    nav.appendChild(createWishlistLink(user));
+  }
   nav.appendChild(createSearchButton());
   nav.appendChild(createNewAuctionButton(user));
 

@@ -284,14 +284,16 @@ async function displayListingDetail() {
         actionsSection.appendChild(disabledBidButton);
       }
 
-      const wishlistButton = document.createElement('button');
-      wishlistButton.className =
-        'px-6 py-3 font-semibold transition-all bg-white border rounded-lg border-cool-steel-300 text-blue-slate-700 hover:bg-cool-steel-50';
-      wishlistButton.textContent = '♥ Add to Wishlist';
-      wishlistButton.addEventListener('click', () => {
-        //---------------------------------------------------- TODOIF I HAVE TIME: Implement wishlist functionality
-      });
-      actionsSection.appendChild(wishlistButton);
+      if (currentUser) {
+        const wishlistButton = document.createElement('button');
+        wishlistButton.className =
+          'px-6 py-3 font-semibold transition-all bg-white border rounded-lg border-cool-steel-300 text-blue-slate-700 hover:bg-cool-steel-50';
+        wishlistButton.textContent = '♥ Add to Wishlist';
+        wishlistButton.addEventListener('click', () => {
+          //---------------------------------------------------- TODOIF I HAVE TIME: Implement wishlist functionality
+        });
+        actionsSection.appendChild(wishlistButton);
+      }
     }
 
     infoSection.appendChild(actionsSection);
