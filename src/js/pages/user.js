@@ -4,6 +4,7 @@ import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
 import { createListingCard } from '../components/listingCard.js';
 import { createBackButton } from '../components/backButton.js';
+import { showError } from '../components/errorDisplay.js';
 
 // Check if user is logged in, if not - straight to jail (login screen)
 const user = getUser();
@@ -452,19 +453,6 @@ function showEmptyState(container, message) {
   empty.appendChild(emptyText);
 
   container.appendChild(empty);
-}
-
-/**
- * Shows an error message
- * @param {HTMLElement} container - The container element
- * @param {string} message - The error message
- */
-function showError(container, message) {
-  const error = document.createElement('div');
-  error.className = 'px-4 py-12 text-center text-petal-frost-600';
-  error.setAttribute('role', 'alert');
-  error.textContent = message;
-  container.appendChild(error);
 }
 
 /**
