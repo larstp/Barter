@@ -2,6 +2,7 @@ import { initializePage } from '../utils/main.js';
 import { getListings } from '../api/listings.js';
 import { createLoader } from '../components/loader.js';
 import { createListingCard } from '../components/listingCard.js';
+import { showError } from '../components/errorDisplay.js';
 
 initializePage();
 displayHomePage();
@@ -192,17 +193,4 @@ async function displayHomePage() {
       showError(main, 'Failed to load page. Please try again.');
     }
   }
-}
-
-/**
- * Shows an error message
- * @param {HTMLElement} container - The container element
- * @param {string} message - The error message
- */
-function showError(container, message) {
-  const error = document.createElement('div');
-  error.className = 'px-4 py-12 text-center text-petal-frost-600';
-  error.setAttribute('role', 'alert');
-  error.textContent = message;
-  container.appendChild(error);
 }

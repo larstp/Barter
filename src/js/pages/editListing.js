@@ -3,6 +3,7 @@ import { initializePage } from '../utils/main.js';
 import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { createBackButton } from '../components/backButton.js';
+import { showErrorInContainer } from '../components/errorDisplay.js';
 
 const user = getUser();
 if (!user) {
@@ -421,18 +422,11 @@ async function handleFormSubmit(event, listingId) {
     window.location.href = `/src/pages/listing-detail.html?id=${listingId}`;
   } catch (error) {
     console.error('Error updating listing:', error);
-    showError(error.message || 'Failed to update auction. Please try again.');
+    showErrorInContainer(
+      'form-error',
+      error.message || 'Failed to update auction. Please try again.'
+    );
     submitButton.disabled = false;
     submitButton.textContent = 'Update Auction';
   }
-}
-
-/**
- * Shows an error message
- */
-function showError(message) {
-  const errorContainer = document.getElementById('form-error');
-  errorContainer.className =
-    'p-3 text-sm border rounded-lg text-petal-frost-700 border-petal-frost-300 bg-petal-frost-50';
-  errorContainer.textContent = message;
 }
