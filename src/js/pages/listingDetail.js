@@ -7,6 +7,7 @@ import { createLoader } from '../components/loader.js';
 import { calculateTimeRemaining } from '../utils/helpers.js';
 import { createBackButton } from '../components/backButton.js';
 import { createImageCarousel } from '../components/imageCarousel.js';
+import { showError } from '../components/errorDisplay.js';
 
 initializePage();
 

@@ -2,6 +2,7 @@ import { register } from '../api/auth.js';
 import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { initializePage } from '../utils/main.js';
+import { showErrorAfter } from '../components/errorDisplay.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -202,35 +203,43 @@ function createRegisterForm() {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const existingError = form.querySelector("[data-error='register']");
-    if (existingError) {
-      existingError.remove();
-    }
-
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
     if (!name || !email || !password) {
-      showError(form, 'Please fill in all fields');
+      const fieldsContainer = form.querySelector('.register-fields');
+      showErrorAfter(fieldsContainer, 'Please fill in all fields', 'register');
       return;
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(name)) {
-      showError(
-        form,
-        'Username can only contain letters, numbers, and underscores'
+      const fieldsContainer = form.querySelector('.register-fields');
+      showErrorAfter(
+        fieldsContainer,
+        'Username can only contain letters, numbers, and underscores',
+        'register'
       );
       return;
     }
 
     if (!email.endsWith('@stud.noroff.no')) {
-      showError(form, 'Email must be a valid @stud.noroff.no address');
+      const fieldsContainer = form.querySelector('.register-fields');
+      showErrorAfter(
+        fieldsContainer,
+        'Email must be a valid @stud.noroff.no address',
+        'register'
+      );
       return;
     }
 
     if (password.length < 8) {
-      showError(form, 'Password must be at least 8 characters long');
+      const fieldsContainer = form.querySelector('.register-fields');
+      showErrorAfter(
+        fieldsContainer,
+        'Password must be at least 8 characters long',
+        'register'
+      );
       return;
     }
 
@@ -259,9 +268,11 @@ function createRegisterForm() {
     } catch (error) {
       loader.remove();
 
-      showError(
-        form,
-        error.message || 'Registration failed. Please try again.'
+      const fieldsContainer = form.querySelector('.register-fields');
+      showErrorAfter(
+        fieldsContainer,
+        error.message || 'Registration failed. Please try again.',
+        'register'
       );
 
       submitButton.disabled = false;
@@ -271,23 +282,6 @@ function createRegisterForm() {
 
   container.appendChild(form);
   main.appendChild(container);
-}
-
-/**
- * Shows an error message in the form
- * @param {HTMLFormElement} form - The form element
- * @param {string} message - The error message
- */
-function showError(form, message) {
-  const errorDiv = document.createElement('div');
-  errorDiv.className =
-    'p-4 text-sm text-center border rounded-lg bg-petal-frost-50 border-petal-frost-300 text-petal-frost-700';
-  errorDiv.textContent = message;
-  errorDiv.setAttribute('role', 'alert');
-  errorDiv.setAttribute('data-error', 'register');
-
-  const fieldsContainer = form.querySelector('.register-fields');
-  fieldsContainer.insertAdjacentElement('afterend', errorDiv);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

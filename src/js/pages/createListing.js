@@ -2,6 +2,7 @@ import { createListing } from '../api/listings.js';
 import { initializePage } from '../utils/main.js';
 import { getUser } from '../utils/storage.js';
 import { createBackButton } from '../components/backButton.js';
+import { showErrorInContainer } from '../components/errorDisplay.js';
 
 // Check if user is logged in
 const user = getUser();
@@ -342,7 +343,7 @@ async function handleFormSubmit(event) {
 
   const endDate = new Date(endsAt);
   if (endDate <= new Date()) {
-    showError('End date must be in the future');
+    showErrorInContainer('form-error', 'End date must be in the future');
     return;
   }
 
@@ -377,18 +378,11 @@ async function handleFormSubmit(event) {
     }
   } catch (error) {
     console.error('Error creating listing:', error);
-    showError(error.message || 'Failed to create auction. Please try again.');
+    showErrorInContainer(
+      'form-error',
+      error.message || 'Failed to create auction. Please try again.'
+    );
     submitButton.disabled = false;
     submitButton.textContent = 'Create Auction';
   }
-}
-
-/**
- * Shows an error message
- */
-function showError(message) {
-  const errorContainer = document.getElementById('form-error');
-  errorContainer.className =
-    'p-3 text-sm border rounded-lg text-petal-frost-700 border-petal-frost-300 bg-petal-frost-50';
-  errorContainer.textContent = message;
 }

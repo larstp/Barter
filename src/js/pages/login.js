@@ -2,6 +2,7 @@ import { login } from '../api/auth.js';
 import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { initializePage } from '../utils/main.js';
+import { showErrorAfter } from '../components/errorDisplay.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -173,22 +174,23 @@ function createLoginForm() {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const existingError = form.querySelector("[data-error='login']");
-    if (existingError) {
-      existingError.remove();
-    }
-
     const email = emailInput.value.trim();
     const password = passwordInput.value;
     const remember = rememberCheckbox.checked;
 
     if (!email || !password) {
-      showError(form, 'Please fill in all fields');
+      const fieldsContainer = form.querySelector('.login-fields');
+      showErrorAfter(fieldsContainer, 'Please fill in all fields', 'login');
       return;
     }
 
     if (!email.endsWith('@stud.noroff.no')) {
-      showError(form, 'Email must be a valid @stud.noroff.no address');
+      const fieldsContainer = form.querySelector('.login-fields');
+      showErrorAfter(
+        fieldsContainer,
+        'Email must be a valid @stud.noroff.no address',
+        'login'
+      );
       return;
     }
 
@@ -224,7 +226,12 @@ function createLoginForm() {
     } catch (error) {
       loader.remove();
 
-      showError(form, error.message || 'Login failed. Please try again.');
+      const fieldsContainer = form.querySelector('.login-fields');
+      showErrorAfter(
+        fieldsContainer,
+        error.message || 'Login failed. Please try again.',
+        'login'
+      );
 
       submitButton.disabled = false;
       submitButton.textContent = 'Log in';
@@ -233,23 +240,6 @@ function createLoginForm() {
 
   container.appendChild(form);
   main.appendChild(container);
-}
-
-/**
- * Shows an error message in the form
- * @param {HTMLFormElement} form - The form element
- * @param {string} message - The error message
- */
-function showError(form, message) {
-  const errorDiv = document.createElement('div');
-  errorDiv.className =
-    'p-4 text-sm text-center border rounded-lg bg-petal-frost-50 border-petal-frost-300 text-petal-frost-700';
-  errorDiv.textContent = message;
-  errorDiv.setAttribute('role', 'alert');
-  errorDiv.setAttribute('data-error', 'login');
-
-  const fieldsContainer = form.querySelector('.login-fields');
-  fieldsContainer.insertAdjacentElement('afterend', errorDiv);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -2,6 +2,7 @@ import { initializePage } from '../utils/main.js';
 import { getProfile, updateProfile } from '../api/profile.js';
 import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
+import { showError, showErrorAfter } from '../components/errorDisplay.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -192,7 +193,11 @@ async function displayEditProfile() {
           updateLoader.remove();
         }
         submitButton.disabled = false;
-        showFormError(form, 'Failed to update profile. Please try again.');
+        showErrorAfter(
+          form.firstElementChild,
+          'Failed to update profile. Please try again.',
+          'edit-profile'
+        );
       }
     });
 
@@ -205,34 +210,6 @@ async function displayEditProfile() {
       showError(main, 'Failed to load edit profile. Please try again.');
     }
   }
-}
-
-/**
- * Shows an error message in the main container
- * @param {HTMLElement} container - The container element
- * @param {string} message - The error message
- */
-function showError(container, message) {
-  const error = document.createElement('div');
-  error.className = 'px-4 py-12 text-center text-red-600';
-  error.setAttribute('role', 'alert');
-  error.textContent = message;
-  container.appendChild(error);
-}
-
-/**
- * Shows an error message in the form
- * @param {HTMLElement} form - The form element
- * @param {string} message - The error message
- */
-function showFormError(form, message) {
-  const error = document.createElement('div');
-  error.className =
-    'p-4 mb-4 text-red-600 border border-red-200 rounded-lg bg-red-50';
-  error.setAttribute('role', 'alert');
-  error.setAttribute('data-error', 'edit-profile');
-  error.textContent = message;
-  form.insertBefore(error, form.firstChild);
 }
 
 displayEditProfile();
