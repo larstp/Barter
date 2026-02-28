@@ -1,3 +1,5 @@
+import { resolvePath } from '../utils/helpers.js';
+
 /**
  * Creates a back button that navigates to the home page (not the previous page as before. became confusing)
  * @returns {HTMLButtonElement} The back button element
@@ -22,7 +24,7 @@ export function createBackButton() {
   backButton.appendChild(backSolidIcon);
 
   backButton.addEventListener('click', () => {
-    window.location.href = '/index.html';
+    window.location.href = resolvePath('index.html');
   });
 
   return backButton;

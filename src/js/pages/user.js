@@ -5,11 +5,12 @@ import { createLoader } from '../components/loader.js';
 import { createListingCard } from '../components/listingCard.js';
 import { createBackButton } from '../components/backButton.js';
 import { showError } from '../components/errorDisplay.js';
+import { resolvePath } from '../utils/helpers.js';
 
 // Check if user is logged in, if not - straight to jail (login screen)
 const user = getUser();
 if (!user) {
-  window.location.href = '/src/pages/login.html';
+  window.location.href = resolvePath('src/pages/login.html');
 } else {
   initializePage();
   displayUserProfile();

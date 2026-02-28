@@ -4,10 +4,11 @@ import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { createBackButton } from '../components/backButton.js';
 import { showErrorInContainer } from '../components/errorDisplay.js';
+import { resolvePath } from '../utils/helpers.js';
 
 const user = getUser();
 if (!user) {
-  window.location.href = '/src/pages/login.html';
+  window.location.href = resolvePath('src/pages/login.html');
 } else {
   initializePage({ includeLogoBackground: true });
   loadAndRenderEditForm();
@@ -419,7 +420,8 @@ async function handleFormSubmit(event, listingId) {
 
     await updateListing(listingId, listingData);
 
-    window.location.href = `/src/pages/listing-detail.html?id=${listingId}`;
+    window.location.href =
+      resolvePath('src/pages/listing-detail.html') + `?id=${listingId}`;
   } catch (error) {
     console.error('Error updating listing:', error);
     showErrorInContainer(

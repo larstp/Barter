@@ -4,6 +4,7 @@ import { createListingCard } from '../components/listingCard.js';
 import { createLoader } from '../components/loader.js';
 import { createBackButton } from '../components/backButton.js';
 import { PAGINATION_LIMITS } from '../utils/constants.js';
+import { resolvePath } from '../utils/helpers.js';
 
 initializePage();
 
@@ -72,7 +73,7 @@ async function displayListingsFeed(page = 1) {
         'px-3 py-1 text-sm font-semibold transition-all border rounded-lg text-blue-slate-700 border-blue-slate-300 hover:bg-blue-slate-50';
       clearButton.textContent = 'Clear';
       clearButton.addEventListener('click', () => {
-        window.location.href = '/src/pages/listings.html';
+        window.location.href = resolvePath('src/pages/listings.html');
       });
       headerContainer.appendChild(clearButton);
     } else {
@@ -282,7 +283,7 @@ async function displayListingsFeed(page = 1) {
           'px-4 py-2 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700';
         clearButton.textContent = 'Clear Search';
         clearButton.addEventListener('click', () => {
-          window.location.href = '/src/pages/listings.html';
+          window.location.href = resolvePath('src/pages/listings.html');
         });
         emptyMessage.appendChild(clearButton);
 

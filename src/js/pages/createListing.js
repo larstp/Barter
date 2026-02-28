@@ -3,11 +3,12 @@ import { initializePage } from '../utils/main.js';
 import { getUser } from '../utils/storage.js';
 import { createBackButton } from '../components/backButton.js';
 import { showErrorInContainer } from '../components/errorDisplay.js';
+import { resolvePath } from '../utils/helpers.js';
 
 // Check if user is logged in
 const user = getUser();
 if (!user) {
-  window.location.href = '/src/pages/login.html';
+  window.location.href = resolvePath('src/pages/login.html');
 } else {
   initializePage({ includeLogoBackground: true });
   renderCreateListingForm();
@@ -372,9 +373,11 @@ async function handleFormSubmit(event) {
 
     // --------------------------------------------------------------------  Redirect to the newly created listing
     if (response.data?.id) {
-      window.location.href = `/src/pages/listing-detail.html?id=${response.data.id}`;
+      window.location.href =
+        resolvePath('src/pages/listing-detail.html') +
+        `?id=${response.data.id}`;
     } else {
-      window.location.href = '/src/pages/listings.html';
+      window.location.href = resolvePath('src/pages/listings.html');
     }
   } catch (error) {
     console.error('Error creating listing:', error);

@@ -1,4 +1,5 @@
 import { clearStorage } from '../utils/storage.js';
+import { resolvePath } from '../utils/helpers.js';
 
 /**
  * Creates a clickable footer link (non-functional, for display only)
@@ -66,7 +67,7 @@ export function renderFooter() {
   logoutLink.setAttribute('tabindex', '0');
   logoutLink.addEventListener('click', () => {
     clearStorage();
-    window.location.href = '/';
+    window.location.href = resolvePath('index.html');
   });
   rightLinks.appendChild(logoutLink);
 
@@ -74,7 +75,7 @@ export function renderFooter() {
   logoContainer.className = 'items-center justify-center hidden lg:flex';
 
   const logo = document.createElement('img');
-  logo.src = '/public/img/logos/logo-text-black.svg';
+  logo.src = resolvePath('public/img/logos/logo-text-black.svg');
   logo.alt = 'Barter';
   logo.className = 'h-16';
 

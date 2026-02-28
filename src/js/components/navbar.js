@@ -1,5 +1,6 @@
 import { getUser } from '../utils/storage.js';
 import { initializeSearch, openSearch } from './searchModal.js';
+import { resolvePath } from '../utils/helpers.js';
 
 /**
  * Creates a navigation item for the mobile navbar
@@ -79,7 +80,9 @@ function openSearchHandler() {
 export function renderNavbar() {
   // Initialize search modal once with callback
   initializeSearch((query) => {
-    window.location.href = `/src/pages/listings.html?search=${encodeURIComponent(query)}`;
+    window.location.href =
+      resolvePath('src/pages/listings.html') +
+      `?search=${encodeURIComponent(query)}`;
   });
 
   const user = getUser();

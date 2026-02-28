@@ -4,7 +4,7 @@ import { getProfile, getProfileListings } from '../api/profile.js';
 import { initializePage } from '../utils/main.js';
 import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
-import { calculateTimeRemaining } from '../utils/helpers.js';
+import { calculateTimeRemaining, resolvePath } from '../utils/helpers.js';
 import { createBackButton } from '../components/backButton.js';
 import { createImageCarousel } from '../components/imageCarousel.js';
 import { showError } from '../components/errorDisplay.js';
@@ -75,7 +75,8 @@ async function displayListingDetail() {
 
     if (listing.seller) {
       const sellerLink = document.createElement('a');
-      sellerLink.href = `/src/pages/user.html?name=${listing.seller.name}`;
+      sellerLink.href =
+        resolvePath('src/pages/user.html') + `?name=${listing.seller.name}`;
       sellerLink.className =
         'flex items-center gap-3 p-3 transition-colors rounded-lg hover:bg-cool-steel-50';
 
@@ -189,7 +190,8 @@ async function displayListingDetail() {
         'px-6 py-3 bg-blue-slate-600 text-white rounded-lg font-semibold transition-all hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0';
       editButton.textContent = 'Edit Listing';
       editButton.addEventListener('click', () => {
-        window.location.href = `/src/pages/edit-listing.html?id=${listingId}`;
+        window.location.href =
+          resolvePath('src/pages/edit-listing.html') + `?id=${listingId}`;
       });
       actionsSection.appendChild(editButton);
 
@@ -271,9 +273,11 @@ async function displayListingDetail() {
         actionsSection.appendChild(loginMessage);
 
         const disabledBidButton = document.createElement('a');
-        disabledBidButton.href = `/src/pages/login.html?redirect=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`;
+        disabledBidButton.href =
+          resolvePath('src/pages/login.html') +
+          `?redirect=${encodeURIComponent(
+            window.location.pathname + window.location.search
+          )}`;
         disabledBidButton.className =
           'block px-6 py-3 font-semibold text-center rounded-lg cursor-not-allowed bg-cool-steel-300 text-cool-steel-600';
         disabledBidButton.textContent = 'Place Bid';
@@ -382,19 +386,6 @@ async function displayListingDetail() {
 }
 
 /**
- * Shows an error message
- * @param {HTMLElement} container - The container element
- * @param {string} message - The error message
- */
-function showError(container, message) {
-  const error = document.createElement('div');
-  error.className = 'px-4 py-12 text-center text-petal-frost-600';
-  error.setAttribute('role', 'alert');
-  error.textContent = message;
-  container.appendChild(error);
-}
-
-/**
  * Shows an error message in the from
  * @param {HTMLElement} form - The form element
  * @param {string} message - The error message
@@ -462,7 +453,7 @@ function showDeleteConfirmationModal(listingId) {
 
       await deleteListing(listingId);
 
-      window.location.href = '/src/pages/listings.html';
+      window.location.href = resolvePath('src/pages/listings.html');
     } catch (error) {
       console.error('Error deleting listing:', error);
 

@@ -136,3 +136,42 @@ export function truncateText(text, maxLength) {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 }
+
+/**
+ * Resolves a path relative to the current page location
+ * This should mitigate the GitHub Pages problem where base path is not root
+ * @param {string} targetPath - The target path to resolve ('index.html', 'src/pages/login.html', 'public/icons/icon.svg', etc.)
+ * @returns {string} The relative path from the current page location
+ */
+export function resolvePath(targetPath) {
+  const cleanTarget = targetPath.startsWith('/')
+    ? targetPath.substring(1)
+    : targetPath;
+
+  // ------------------------------------Check if we're on index.html (simple paths)
+  const isOnIndexPage =
+    window.location.pathname.endsWith('/index.html') ||
+    window.location.pathname === '/' ||
+    !window.location.pathname.includes('/src/pages/');
+
+  // -------------------------------If on index.html, paths are simple: just add ./
+  if (isOnIndexPage) {
+    return './' + cleanTarget;
+  }
+
+  // Otherwise we're in src/pages/, need to adjust paths (i cnt believe how unnecessary this is but here we are)
+  // -------------------------------------------------------------- For index.html, go up two levels
+  if (cleanTarget === 'index.html' || cleanTarget === '') {
+    return '../../index.html';
+  }
+  // --------------------------------------------------------- For other src/pages/, they're in same directory
+  if (cleanTarget.startsWith('src/pages/')) {
+    return './' + cleanTarget.replace('src/pages/', '');
+  }
+  // --------------------------------------------------------   For public/, go up two levels
+  if (cleanTarget.startsWith('public/')) {
+    return '../../' + cleanTarget;
+  }
+
+  return './' + cleanTarget;
+}

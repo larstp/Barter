@@ -1,5 +1,6 @@
 import { getUser } from '../utils/storage.js';
 import { initializeSearch, openSearch } from './searchModal.js';
+import { resolvePath } from '../utils/helpers.js';
 
 /**
  * Creates the credits display for mobile (icon + number)
@@ -11,7 +12,7 @@ function createMobileCreditsDisplay(user) {
   container.className = 'flex items-center gap-2';
 
   const icon = document.createElement('img');
-  icon.src = '/public/icons/ph_currency-eth-bold.svg';
+  icon.src = resolvePath('public/icons/ph_currency-eth-bold.svg');
   icon.alt = 'Credits';
   icon.className = 'w-6 h-6';
 
@@ -35,7 +36,7 @@ function createDesktopCreditsDisplay(user) {
   container.className = 'items-center hidden gap-2 lg:flex';
 
   const icon = document.createElement('img');
-  icon.src = '/public/icons/ph_currency-eth-bold.svg';
+  icon.src = resolvePath('public/icons/ph_currency-eth-bold.svg');
   icon.alt = 'Credits';
   icon.className = 'w-5 h-5';
 
@@ -55,11 +56,11 @@ function createDesktopCreditsDisplay(user) {
  */
 function createLogoLink() {
   const link = document.createElement('a');
-  link.href = '/index.html';
+  link.href = resolvePath('index.html');
   link.className = 'flex items-center justify-center lg:justify-start';
 
   const img = document.createElement('img');
-  img.src = '/public/img/logos/logo-65x65.svg';
+  img.src = resolvePath('public/img/logos/logo-65x65.svg');
   img.alt = 'Barter Auction House';
   img.className = 'h-8';
 
@@ -75,7 +76,7 @@ function createLogoLink() {
  */
 function createProfileLink(user) {
   const link = document.createElement('a');
-  link.href = '/src/pages/user.html';
+  link.href = resolvePath('src/pages/user.html');
   link.className =
     'flex items-center justify-end transition-transform hover:scale-105';
 
@@ -96,7 +97,7 @@ function createProfileLink(user) {
  */
 function createLoginButton() {
   const link = document.createElement('a');
-  link.href = '/src/pages/login.html';
+  link.href = resolvePath('src/pages/login.html');
   link.className =
     'flex items-center justify-end transition-transform hover:scale-105';
 
@@ -119,7 +120,7 @@ function createPlaceholder() {
   div.className = 'flex items-center justify-end';
 
   const img = document.createElement('img');
-  img.src = '/public/icons/flowbite_user-circle-solid-black.svg';
+  img.src = resolvePath('public/icons/flowbite_user-circle-solid-black.svg');
   img.alt = 'User';
   img.className = 'w-10 h-10';
 
@@ -134,7 +135,7 @@ function createPlaceholder() {
  */
 function createAllAuctionsLink() {
   const link = document.createElement('a');
-  link.href = '/src/pages/listings.html';
+  link.href = resolvePath('src/pages/listings.html');
   link.className =
     'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
   link.textContent = 'All Auctions';
@@ -150,9 +151,11 @@ function createAllAuctionsLink() {
 function createWishlistLink(user) {
   const link = document.createElement('a');
   if (user) {
-    link.href = '/src/pages/wishlist.html';
+    link.href = resolvePath('src/pages/wishlist.html');
   } else {
-    link.href = `/src/pages/login.html?redirect=${encodeURIComponent('/src/pages/wishlist.html')}`;
+    link.href =
+      resolvePath('src/pages/login.html') +
+      `?redirect=${encodeURIComponent(resolvePath('src/pages/wishlist.html'))}`;
   }
   link.className =
     'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
@@ -188,9 +191,11 @@ function createSearchButton() {
 function createNewAuctionButton(user) {
   const link = document.createElement('a');
   if (user) {
-    link.href = '/src/pages/create-listing.html';
+    link.href = resolvePath('src/pages/create-listing.html');
   } else {
-    link.href = `/src/pages/login.html?redirect=${encodeURIComponent('/src/pages/create-listing.html')}`;
+    link.href =
+      resolvePath('src/pages/login.html') +
+      `?redirect=${encodeURIComponent(resolvePath('src/pages/create-listing.html'))}`;
   }
   link.className =
     'px-4 py-2 text-sm font-semibold text-white transition-all rounded-lg bg-blue-slate-700 hover:bg-blue-slate-800 hover:scale-105';
@@ -232,7 +237,9 @@ function createDesktopNav(user, isLoginPage) {
 export function renderHeader() {
   // Initialize search modal once with callback
   initializeSearch((query) => {
-    window.location.href = `/src/pages/listings.html?search=${encodeURIComponent(query)}`;
+    window.location.href =
+      resolvePath('src/pages/listings.html') +
+      `?search=${encodeURIComponent(query)}`;
   });
 
   const user = getUser();

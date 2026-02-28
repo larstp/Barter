@@ -3,6 +3,7 @@ import { getProfile, updateProfile } from '../api/profile.js';
 import { getUser, saveUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { showError, showErrorAfter } from '../components/errorDisplay.js';
+import { resolvePath } from '../utils/helpers.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -110,7 +111,7 @@ async function displayEditProfile() {
     buttonsContainer.className = 'flex gap-4 mt-4';
 
     const cancelButton = document.createElement('a');
-    cancelButton.href = '/src/pages/user.html';
+    cancelButton.href = resolvePath('src/pages/user.html');
     cancelButton.className =
       'flex-1 p-4 bg-white text-blue-slate-800 border border-cool-steel-300 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 inline-block text-center no-underline hover:bg-petal-frost-600 hover:text-white hover:border-petal-frost-600 hover:-translate-y-0.5 active:translate-y-0';
     cancelButton.textContent = 'Cancel';
@@ -185,7 +186,7 @@ async function displayEditProfile() {
 
         updateLoader.remove();
 
-        window.location.href = '/src/pages/user.html';
+        window.location.href = resolvePath('src/pages/user.html');
       } catch (error) {
         console.error('Error updating profile:', error);
         const updateLoader = form.querySelector('.loader-container');
