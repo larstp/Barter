@@ -66,7 +66,7 @@ export function initializeSearch(onSearch) {
   const searchButton = document.createElement('button');
   searchButton.type = 'submit';
   searchButton.className =
-    'flex-1 px-4 py-2 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700';
+    'flex-1 px-4 py-2 font-semibold text-white transition-all rounded-lg bg-blue-slate-600 hover:bg-blue-slate-700 disabled:opacity-50 disabled:cursor-not-allowed';
   searchButton.textContent = 'Search';
   searchButton.setAttribute('aria-label', 'Search');
   buttonContainer.appendChild(searchButton);
@@ -80,19 +80,25 @@ export function initializeSearch(onSearch) {
   function openSearch() {
     overlay.style.display = 'flex';
     input.focus();
+    searchButton.disabled = false;
+    searchButton.textContent = 'Search';
   }
 
   function closeSearch() {
     overlay.style.display = 'none';
     input.value = '';
+    searchButton.disabled = false;
+    searchButton.textContent = 'Search';
   }
 
   function performSearch() {
     const query = input.value.trim();
 
     if (query && onSearch) {
+      searchButton.disabled = true;
+      searchButton.textContent = 'Searching...';
+
       onSearch(query);
-      closeSearch();
     }
   }
 

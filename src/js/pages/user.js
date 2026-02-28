@@ -173,6 +173,11 @@ async function displayUserProfile() {
             userBids.push(bid);
           }
         });
+
+        const uniqueBidsCount = new Set(
+          userBids.map((bid) => bid.listing?.id).filter((id) => id)
+        ).size;
+        userBids.uniqueCount = uniqueBidsCount;
       } catch (error) {
         console.error('Error fetching bids:', error);
       }
@@ -255,7 +260,7 @@ async function displayUserProfile() {
       tabs.push({
         id: 'bids',
         label: 'Current Bids',
-        count: userBids.length,
+        count: userBids.uniqueCount || 0,
       });
     }
 
@@ -387,15 +392,27 @@ function showTabContent(tabId, profile, userBids, pendingWins = []) {
     }
   } else if (tabId === 'bids') {
     if (userBids && userBids.length > 0) {
+      // ------------------------------------------------------- Group bids by listing ID to avoid dupes
+      const uniqueBids = new Map();
+
+      userBids.forEach((bid) => {
+        if (bid.listing && bid.listing.id) {
+          const listingId = bid.listing.id;
+          const existingBid = uniqueBids.get(listingId);
+
+          if (!existingBid || bid.amount > existingBid.amount) {
+            uniqueBids.set(listingId, bid);
+          }
+        }
+      });
+
       const bidsGrid = document.createElement('div');
       bidsGrid.className =
         'grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3';
 
-      userBids.forEach((bid) => {
-        if (bid.listing) {
-          const listingCard = createBidListingCard(bid);
-          bidsGrid.appendChild(listingCard);
-        }
+      uniqueBids.forEach((bid) => {
+        const listingCard = createBidListingCard(bid);
+        bidsGrid.appendChild(listingCard);
       });
 
       contentContainer.appendChild(bidsGrid);

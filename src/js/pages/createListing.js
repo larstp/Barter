@@ -8,7 +8,7 @@ const user = getUser();
 if (!user) {
   window.location.href = '/src/pages/login.html';
 } else {
-  initializePage();
+  initializePage({ includeLogoBackground: true });
   renderCreateListingForm();
 }
 

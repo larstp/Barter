@@ -3,5 +3,4 @@ node_modules/
 *.log
 .env
 .vscode/
-src/css/tailwind.css
 documentation/api-reference.md
