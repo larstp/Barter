@@ -143,20 +143,21 @@ function createAllAuctionsLink() {
   return link;
 }
 
-/**
- * Creates the wishlist link for desktop navigation (requires logged in user)
- * @returns {HTMLAnchorElement} Wishlist link
- */
-function createWishlistLink() {
-  const link = document.createElement('a');
-  link.href = resolvePath('src/pages/wishlist.html');
-  link.className =
-    'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
-  link.setAttribute('aria-label', 'Wishlist');
-  link.textContent = 'Wishlist';
-
-  return link;
-}
+// TODO: Uncomment when wishlist feature is implemented
+// /**
+//  * Creates the wishlist link for desktop navigation (requires logged in user)
+//  * @returns {HTMLAnchorElement} Wishlist link
+//  */
+// function createWishlistLink() {
+//   const link = document.createElement('a');
+//   link.href = resolvePath('src/pages/wishlist.html');
+//   link.className =
+//     'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
+//   link.setAttribute('aria-label', 'Wishlist');
+//   link.textContent = 'Wishlist';
+//
+//   return link;
+// }
 
 /**
  * Creates the search button for desktop navigation
@@ -208,9 +209,10 @@ function createDesktopNav(user, isLoginPage) {
   nav.className = 'items-center hidden gap-2 lg:flex';
 
   nav.appendChild(createAllAuctionsLink());
-  if (user) {
-    nav.appendChild(createWishlistLink(user));
-  }
+  // TODO: Uncomment when wishlist feature is implemented
+  // if (user) {
+  //   nav.appendChild(createWishlistLink());
+  // }
   nav.appendChild(createSearchButton());
   nav.appendChild(createNewAuctionButton(user));
 

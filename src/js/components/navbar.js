@@ -96,7 +96,7 @@ export function renderNavbar() {
 
   const navbar = document.createElement('nav');
   navbar.className =
-    'fixed z-50 flex items-center justify-around gap-2 px-4 py-1 border rounded-lg shadow-2xl bottom-6 left-1 right-1 lg:hidden bg-blue-slate-700/90 backdrop-blur-md border-white/10';
+    'fixed z-50 flex items-center justify-around gap-2 px-4 py-3 border rounded-lg shadow-2xl bottom-6 left-1 right-1 lg:hidden bg-blue-slate-700/90 backdrop-blur-md border-white/10';
   navbar.setAttribute('role', 'navigation');
   navbar.setAttribute('aria-label', 'Mobile navigation');
 
