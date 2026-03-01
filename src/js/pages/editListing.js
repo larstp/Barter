@@ -114,12 +114,18 @@ function renderEditListingForm(listing, listingId) {
   );
   form.appendChild(descriptionGroup);
 
-  // -------------------------------------------------------------- Note about end date because i cant figure this out
-  const endDateNote = document.createElement('div');
-  endDateNote.className =
-    'p-3 text-sm border rounded-lg text-cool-steel-700 border-cool-steel-300 bg-cool-steel-50';
-  endDateNote.textContent = 'Note: End date cannot be changed after creation';
-  form.appendChild(endDateNote);
+  //------------------------------- End date field (I missed that this was possible from the API docs until now)
+  const endsAtDate = new Date(listing.endsAt);
+  const formattedEndsAt = endsAtDate.toISOString().slice(0, 16);
+  const endDateGroup = createFormGroup(
+    'endsAt',
+    'End Date',
+    'datetime-local',
+    '',
+    true,
+    formattedEndsAt
+  );
+  form.appendChild(endDateGroup);
 
   const tagsSection = createTagsSection(listing.tags || []);
   form.appendChild(tagsSection);
@@ -378,6 +384,7 @@ async function handleFormSubmit(event, listingId) {
 
   const title = form.title.value.trim();
   const description = form.description.value.trim();
+  const endsAt = form.endsAt.value;
 
   const tagsDisplay = document.getElementById('tags-display');
   const tags = Array.from(tagsDisplay.children).map((tag) => tag.dataset.value);
@@ -404,6 +411,10 @@ async function handleFormSubmit(event, listingId) {
 
   if (description) {
     listingData.description = description;
+  }
+
+  if (endsAt) {
+    listingData.endsAt = new Date(endsAt).toISOString();
   }
 
   if (tags.length > 0) {
