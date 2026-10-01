@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tailwindcss -i ./src/css/tailwind.input.css -o ./src/css/tailwind.css --minify",
+    "dev": "npm run watch",
     "watch": "tailwindcss -i ./src/css/tailwind.input.css -o ./src/css/tailwind.css --watch",
     "format": "prettier --write \"**/*.{js,html,css,md}\"",
     "lint": "eslint src/js/**/*.js"

@@ -54,7 +54,7 @@ Barter is a modern auction house platform built as part of the Semester Project 
 ### Project Links:
 
 - GitHub Repo: [https://github.com/larstp/semesterproject2](https://github.com/larstp/semesterproject2)
-- Live Site: [https://larstp.github.io/Barter](https://larstp.github.io/Barter)
+- Hosting: Vercel
 
 ---
 
@@ -71,15 +71,18 @@ Barter is a modern auction house platform built as part of the Semester Project 
    ```bash
    npm install
    ```
-3. Run development mode (with Tailwind watch):
+3. Run development mode with Tailwind watch:
    ```bash
    npm run dev
    ```
-4. Or build for production:
+4. Build for production:
    ```bash
    npm run build
    ```
-5. Open `index.html` in your browser using Live Server
+5. Open `index.html` in your browser using Live Server.
+
+Vercel uses `npm run build` automatically and serves the project root. The
+deployment configuration is stored in `vercel.json`.
 
 ---
 
