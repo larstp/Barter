@@ -78,7 +78,6 @@ function openSearchHandler() {
  * - Only visible when user is logged in
  */
 export function renderNavbar() {
-  // Initialize search modal once with callback
   initializeSearch((query) => {
     window.location.href =
       resolvePath('src/pages/listings.html') +

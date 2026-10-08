@@ -1,10 +1,12 @@
 import { initializePage } from '../utils/main.js';
 import { getListings } from '../api/listings.js';
+import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { createListingCard } from '../components/listingCard.js';
 import { showError } from '../components/errorDisplay.js';
 
 initializePage();
+document.body.classList.add('home-page');
 displayHomePage();
 
 /**
@@ -22,7 +24,6 @@ async function displayHomePage() {
     const loader = createLoader('Loading...');
     main.appendChild(loader);
 
-    // ------------------------------Fetch active listings sorted by endsAt (ascending) to get the one ending soonest. Might be messy if there is exactly the same time left on a listing but none of them have that now
     const response = await getListings(1, 1, '', true, 'endsAt', 'asc');
     const listing = response.data?.[0];
 
@@ -39,7 +40,7 @@ async function displayHomePage() {
     const bgImage = document.createElement('img');
     bgImage.src =
       listing.media?.[0]?.url ||
-      'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&h=600&fit=crop'; // added random fallback image :)
+      'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&h=600&fit=crop';
     bgImage.alt = listing.media?.[0]?.alt || listing.title;
     bgImage.className = 'object-cover w-full h-full';
 
@@ -72,6 +73,14 @@ async function displayHomePage() {
     seller.textContent = `By ${listing.seller?.name || 'Unknown'}`;
     textContainer.appendChild(seller);
 
+    const highestBid = listing.bids?.length
+      ? Math.max(...listing.bids.map((bid) => bid.amount))
+      : 0;
+    const bid = document.createElement('p');
+    bid.className = '-mt-2 text-base font-bold md:text-lg';
+    bid.textContent = `Current highest bid: ${highestBid.toLocaleString()} credits`;
+    textContainer.appendChild(bid);
+
     const button = document.createElement('a');
     button.href = `./src/pages/listing-detail.html?id=${listing.id}`;
     button.className =
@@ -83,13 +92,17 @@ async function displayHomePage() {
     hero.appendChild(content);
     main.appendChild(hero);
 
-    // -------------------------------------------------------------- all section
+    if (!getUser()) {
+      main.appendChild(createSignupMarquee());
+    }
+
     const ctaSection = document.createElement('section');
-    ctaSection.className = 'max-w-[1200px] mx-auto px-4 py-4 md:py-16';
+    ctaSection.className =
+      'max-w-[1200px] mx-auto px-6 py-4 sm:px-8 md:py-16 lg:px-4';
 
     const ctaContainer = document.createElement('div');
     ctaContainer.className =
-      'flex flex-col items-center gap-8 md:flex-row md:gap-12';
+      'flex flex-col items-center gap-8 md:flex-row md:gap-12 md:pl-8';
 
     const ctaContent = document.createElement('div');
     ctaContent.className =
@@ -103,7 +116,8 @@ async function displayHomePage() {
 
     const ctaSubheading = document.createElement('p');
     ctaSubheading.className = 'text-xl font-semibold text-blue-slate-700';
-    ctaSubheading.textContent = 'Barter away!';
+    ctaSubheading.textContent =
+      'Discover curated auctions from around the world and find something worth bidding on.';
     ctaContent.appendChild(ctaSubheading);
 
     const ctaButton = document.createElement('a');
@@ -123,7 +137,6 @@ async function displayHomePage() {
     ctaSection.appendChild(ctaContainer);
     main.appendChild(ctaSection);
 
-    // ---------------------------------------------------------Popular section
     const popularResponse = await getListings(
       30,
       1,
@@ -134,11 +147,10 @@ async function displayHomePage() {
     );
     const allListings = popularResponse.data || [];
 
-    //--------------- Get recent listings BEFORE sorting (since sort mutates the array and everything breeeeaks)
     const recentListings = allListings.slice(0, 3);
 
     const popularListings = allListings
-      .sort((a, b) => (b._count?.bids || 0) - (a._count?.bids || 0)) // THIS i had help with omg
+      .sort((a, b) => (b._count?.bids || 0) - (a._count?.bids || 0))
       .slice(0, 3);
 
     if (popularListings.length > 0) {
@@ -147,9 +159,15 @@ async function displayHomePage() {
 
       const popularHeading = document.createElement('h2');
       popularHeading.className =
-        'mb-8 text-3xl font-bold text-center font-display text-blue-slate-900';
+        'mb-2 text-3xl font-bold text-center font-display text-blue-slate-900';
       popularHeading.textContent = 'Check out our most popular auctions';
       popularSection.appendChild(popularHeading);
+
+      const popularSubheading = document.createElement('p');
+      popularSubheading.className = 'mb-8 text-center text-cool-steel-700';
+      popularSubheading.textContent =
+        'Explore the listings attracting the most attention from our community.';
+      popularSection.appendChild(popularSubheading);
 
       const popularGrid = document.createElement('div');
       popularGrid.className =
@@ -170,9 +188,15 @@ async function displayHomePage() {
 
       const recentHeading = document.createElement('h2');
       recentHeading.className =
-        'mb-8 text-3xl font-bold text-center font-display text-blue-slate-900';
+        'mb-2 text-3xl font-bold text-center font-display text-blue-slate-900';
       recentHeading.textContent = 'Recently added';
       recentSection.appendChild(recentHeading);
+
+      const recentSubheading = document.createElement('p');
+      recentSubheading.className = 'mb-8 text-center text-cool-steel-700';
+      recentSubheading.textContent =
+        'Discover the latest items added to the marketplace.';
+      recentSection.appendChild(recentSubheading);
 
       const recentGrid = document.createElement('div');
       recentGrid.className =
@@ -193,4 +217,37 @@ async function displayHomePage() {
       showError(main, 'Failed to load page. Please try again.');
     }
   }
+}
+
+/**
+ * Creates the logged-out signup announcement marquee.
+ * @returns {HTMLElement} The signup marquee section.
+ */
+function createSignupMarquee() {
+  const message =
+    'Sign up today and receive 1000 free credits to explore curated auctions, place your first bids, and discover something worth bringing home. Only at Barter';
+  const marquee = document.createElement('section');
+  marquee.className =
+    'signup-marquee overflow-hidden bg-blue-slate-700 text-white';
+  marquee.setAttribute('aria-label', message);
+
+  const track = document.createElement('div');
+  track.className = 'signup-marquee-track flex w-max whitespace-nowrap';
+
+  [false, true].forEach((isDuplicate) => {
+    const group = document.createElement('div');
+    group.className = 'signup-marquee-group flex shrink-0';
+
+    const link = document.createElement('a');
+    link.href = './src/pages/register.html';
+    link.className =
+      'shrink-0 px-8 py-3 text-sm font-semibold no-underline transition-colors hover:bg-blue-slate-800 md:text-base';
+    link.textContent = message;
+    if (isDuplicate) link.setAttribute('aria-hidden', 'true');
+    group.appendChild(link);
+    track.appendChild(group);
+  });
+
+  marquee.appendChild(track);
+  return marquee;
 }

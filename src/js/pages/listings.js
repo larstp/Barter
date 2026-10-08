@@ -7,11 +7,12 @@ import { PAGINATION_LIMITS } from '../utils/constants.js';
 import { resolvePath } from '../utils/helpers.js';
 
 initializePage();
+document.body.classList.add('listings-page');
 
 let currentPage = 1;
 let currentSort = 'created';
-let currentSortOrder = 'desc'; // Default: Newest First (so far, might change)
-let currentTag = ''; // Filter by tag
+let currentSortOrder = 'desc';
+let currentTag = '';
 let searchQuery = '';
 
 /**
@@ -28,7 +29,6 @@ async function displayListingsFeed(page = 1) {
       return;
     }
 
-    // ---------------------------------------------------Get search query from URL if there
     const urlParams = new URLSearchParams(window.location.search);
     searchQuery = urlParams.get('search') || '';
 
@@ -66,7 +66,6 @@ async function displayListingsFeed(page = 1) {
 
     headerContainer.appendChild(heading);
 
-    // Add clear search button or spacer or whatever
     if (searchQuery) {
       const clearButton = document.createElement('button');
       clearButton.className =
@@ -84,7 +83,6 @@ async function displayListingsFeed(page = 1) {
 
     feedContainer.appendChild(headerContainer);
 
-    // --------------------------------------------------------------------Tag and Sorting dropdowns
     const sortContainer = document.createElement('div');
     sortContainer.className =
       'flex flex-wrap items-center justify-between gap-4 mb-6';
@@ -153,7 +151,7 @@ async function displayListingsFeed(page = 1) {
       const [sort, sortOrder] = e.target.value.split('-');
       currentSort = sort;
       currentSortOrder = sortOrder;
-      currentPage = 1; // Reset to first page
+      currentPage = 1;
       displayListingsFeed(1);
     });
 
@@ -165,14 +163,12 @@ async function displayListingsFeed(page = 1) {
     feedContainer.appendChild(loader);
     main.appendChild(feedContainer);
 
-    // -------------------------------For price sorting, we don't pass it to API (we'll sort client-side because i dont know how else to make it work)
     const apiSort = currentSort === 'price' ? 'created' : currentSort;
     const apiSortOrder = currentSort === 'price' ? 'desc' : currentSortOrder;
 
-    // When searching, fetch more listings to search through
     const limit = searchQuery
       ? PAGINATION_LIMITS.SEARCH
-      : PAGINATION_LIMITS.DEFAULT; // --- MUCH easier
+      : PAGINATION_LIMITS.DEFAULT;
 
     const response = await getListings(
       limit,
@@ -213,7 +209,6 @@ async function displayListingsFeed(page = 1) {
       .map(([tag]) => tag);
 
     if (tagSelect.options.length === 1) {
-      // ugh this thing is killing me
       sortedTags.forEach((tag) => {
         const option = document.createElement('option');
         option.value = tag;
@@ -254,7 +249,6 @@ async function displayListingsFeed(page = 1) {
       }
     }
 
-    // -------------------------------------------------------------- title and tag filtering
     if (searchQuery) {
       listings = listings.filter((listing) => {
         const title = listing.title || '';
@@ -292,7 +286,6 @@ async function displayListingsFeed(page = 1) {
       }
     }
 
-    // Client-side sorting for price (Got help from fullstack friend here also. These math functions dont work in my head)
     if (currentSort === 'price') {
       listings = listings.sort((a, b) => {
         const aBids = a.bids || [];
@@ -321,7 +314,6 @@ async function displayListingsFeed(page = 1) {
 
     feedContainer.appendChild(grid);
 
-    // Only show pagination when not searching
     const meta = response.meta;
     if (
       !searchQuery &&
@@ -336,7 +328,6 @@ async function displayListingsFeed(page = 1) {
       const hasNextPage = meta.isLastPage === false;
 
       if (hasPrevPage) {
-        // making this work with the icon is proving to be a pain. im using hours on this..
         const prevBtn = document.createElement('button');
         prevBtn.className =
           'relative flex items-center justify-center w-8 h-8 transition-transform duration-200 ease-in-out cursor-pointer hover:scale-110 group';

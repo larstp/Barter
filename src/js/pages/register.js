@@ -3,6 +3,7 @@ import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { initializePage } from '../utils/main.js';
 import { showErrorAfter } from '../components/errorDisplay.js';
+import { addPasswordToggle } from '../utils/passwordVisibility.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -77,7 +78,6 @@ function createRegisterForm() {
     'Username can only contain letters, numbers, and underscores';
   fieldsContainer.appendChild(nameInput);
 
-  // -------------------------------------------------------------- Username validation feedback test
   nameInput.addEventListener('blur', () => {
     const value = nameInput.value.trim();
     const isValid = /^[a-zA-Z0-9_]+$/.test(value);
@@ -115,7 +115,6 @@ function createRegisterForm() {
   emailInput.title = 'Email must end with @stud.noroff.no';
   fieldsContainer.appendChild(emailInput);
 
-  // -------------------------------------------------- Email validation feedback test
   emailInput.addEventListener('blur', () => {
     const value = emailInput.value.trim();
     if (value && value.endsWith('@stud.noroff.no')) {
@@ -152,8 +151,8 @@ function createRegisterForm() {
   passwordInput.title = 'Password must be at least 8 characters';
   passwordInput.setAttribute('aria-label', 'Password');
   fieldsContainer.appendChild(passwordInput);
+  addPasswordToggle(passwordInput);
 
-  // ---------------------------------------Password validation feedback test 2 (works now i hope)
   passwordInput.addEventListener('blur', () => {
     const value = passwordInput.value;
     if (value && value.length >= 8) {
@@ -169,6 +168,51 @@ function createRegisterForm() {
         'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-cool-steel-200 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
       passwordInput.removeAttribute('aria-invalid');
     }
+  });
+
+  const confirmPasswordLabel = document.createElement('label');
+  confirmPasswordLabel.className =
+    'block mb-2 text-sm font-semibold text-cool-steel-800';
+  confirmPasswordLabel.textContent = 'Confirm Password';
+  confirmPasswordLabel.setAttribute('for', 'confirm-password');
+  fieldsContainer.appendChild(confirmPasswordLabel);
+
+  const confirmPasswordInput = document.createElement('input');
+  confirmPasswordInput.type = 'password';
+  confirmPasswordInput.id = 'confirm-password';
+  confirmPasswordInput.name = 'confirm-password';
+  confirmPasswordInput.className =
+    'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-cool-steel-200 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+  confirmPasswordInput.placeholder = '••••••••';
+  confirmPasswordInput.required = true;
+  confirmPasswordInput.minLength = 8;
+  confirmPasswordInput.title = 'Passwords must match';
+  confirmPasswordInput.setAttribute('aria-label', 'Confirm password');
+  fieldsContainer.appendChild(confirmPasswordInput);
+  addPasswordToggle(confirmPasswordInput);
+
+  const updateConfirmPasswordState = () => {
+    const value = confirmPasswordInput.value;
+    const isValid = value.length >= 8 && value === passwordInput.value;
+
+    if (!value) {
+      confirmPasswordInput.className =
+        'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-cool-steel-200 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+      confirmPasswordInput.removeAttribute('aria-invalid');
+    } else if (isValid) {
+      confirmPasswordInput.className =
+        'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-celadon-500 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-celadon-600 focus:ring-2 focus:ring-celadon-200';
+      confirmPasswordInput.setAttribute('aria-invalid', 'false');
+    } else {
+      confirmPasswordInput.className =
+        'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-petal-frost-500 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-petal-frost-600 focus:ring-2 focus:ring-petal-frost-200';
+      confirmPasswordInput.setAttribute('aria-invalid', 'true');
+    }
+  };
+
+  confirmPasswordInput.addEventListener('blur', updateConfirmPasswordState);
+  passwordInput.addEventListener('input', () => {
+    if (confirmPasswordInput.value) updateConfirmPasswordState();
   });
 
   const passwordHint = document.createElement('p');
@@ -206,8 +250,9 @@ function createRegisterForm() {
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       const fieldsContainer = form.querySelector('.register-fields');
       showErrorAfter(fieldsContainer, 'Please fill in all fields', 'register');
       return;
@@ -240,6 +285,12 @@ function createRegisterForm() {
         'Password must be at least 8 characters long',
         'register'
       );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      updateConfirmPasswordState();
+      showErrorAfter(fieldsContainer, 'Passwords must match', 'register');
       return;
     }
 

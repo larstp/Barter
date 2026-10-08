@@ -1,5 +1,3 @@
-// had help from claude here regarding correct image import. its a bit more complex than i expected when taking linked images from api
-
 /**
  * Creates an image carousel component
  * @param {Array} mediaArray - Array of media objects with url and alt properties
@@ -19,7 +17,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
 
   const validMedia = mediaArray?.filter((item) => item?.url) || [];
 
-  // -------------------------------------------------------- placeholder
   if (validMedia.length === 0) {
     const placeholder = document.createElement('div');
     placeholder.className =
@@ -34,7 +31,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
 
   let currentIndex = 0;
 
-  // Main image container
   const imageWrapper = document.createElement('div');
   imageWrapper.className = 'relative w-full overflow-hidden rounded-lg group';
 
@@ -45,9 +41,7 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
     'object-cover w-full transition-opacity duration-300 rounded-lg bg-cool-steel-100 aspect-square';
   imageWrapper.appendChild(mainImage);
 
-  // Navigation arrows (only show if more than 1 image)
   if (validMedia.length > 1) {
-    //------------------------------------------------------------------------- Left
     const leftArrow = document.createElement('button');
     leftArrow.type = 'button';
     leftArrow.className =
@@ -56,7 +50,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
     leftArrow.innerHTML =
       '<svg class="w-6 h-6 text-blue-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>';
 
-    // ------------------------------------------------------Right
     const rightArrow = document.createElement('button');
     rightArrow.type = 'button';
     rightArrow.className =
@@ -65,7 +58,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
     rightArrow.innerHTML =
       '<svg class="w-6 h-6 text-blue-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
 
-    // -------------------------------------------------------- counter
     const counter = document.createElement('div');
     counter.className =
       'absolute px-3 py-1 text-sm font-medium text-white rounded-full top-2 right-2 bg-black/50 backdrop-blur-sm';
@@ -75,8 +67,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
     imageWrapper.appendChild(rightArrow);
     imageWrapper.appendChild(counter);
 
-    // Navigation
-    // NB: had help from friend on this part. I wanted to implement smooth fade transition between images, and it turned out to be a bit more complex than i expected. The main challenge was to ensure that the new image is fully loaded before fading in, to avoid showing a blank space during the transition. To achieve this, I used a combination of CSS transitions and JavaScript event listeners to manage the image loading and opacity changes.
     function updateImage() {
       mainImage.style.opacity = '0';
       setTimeout(() => {
@@ -101,7 +91,6 @@ export function createImageCarousel(mediaArray, fallbackTitle = 'Image') {
     leftArrow.addEventListener('click', goToPrevious);
     rightArrow.addEventListener('click', goToNext);
 
-    //---------------------------------------------------------- Keyboard navigation (test)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
         goToPrevious();

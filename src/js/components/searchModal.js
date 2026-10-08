@@ -11,7 +11,6 @@ let searchInstance = null;
  * Clicking outside or pressing ESC closes the modal.
  */
 export function initializeSearch(onSearch) {
-  // Remove any existing modal
   const existingModal = document.querySelector('[data-modal="search"]');
   if (existingModal) {
     existingModal.remove();

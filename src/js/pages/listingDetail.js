@@ -78,7 +78,7 @@ async function displayListingDetail() {
       sellerLink.href =
         resolvePath('src/pages/user.html') + `?name=${listing.seller.name}`;
       sellerLink.className =
-        'flex items-center gap-3 p-3 transition-colors rounded-lg hover:bg-cool-steel-50';
+        'listing-seller-link flex items-center gap-3 p-3 transition-colors rounded-lg hover:bg-cool-steel-50';
 
       if (listing.seller.avatar?.url) {
         const avatar = document.createElement('img');
@@ -94,6 +94,7 @@ async function displayListingDetail() {
 
       const sellerName = document.createElement('span');
       sellerName.className = 'font-semibold text-blue-slate-900';
+      sellerName.classList.add('listing-seller-name');
       sellerName.textContent = listing.seller.name;
       sellerInfo.appendChild(sellerName);
 
@@ -110,7 +111,7 @@ async function displayListingDetail() {
           listing.seller.name,
           1,
           1
-        ); // screw this thing i cant figure out why this wont work
+        );
         const listingsCount = sellerListingsData.meta?.totalCount || 0;
         sellerStats.textContent = `${listingsCount} ${listingsCount === 1 ? 'listing' : 'listings'}`;
       } catch (error) {
@@ -180,7 +181,6 @@ async function displayListingDetail() {
     const actionsSection = document.createElement('div');
     actionsSection.className = 'flex flex-col gap-4';
 
-    // ----------------------------------------------------------------Check if current user is the owner of the listing
     const isOwner =
       currentUser && listing.seller && currentUser.name === listing.seller.name;
 
@@ -204,24 +204,23 @@ async function displayListingDetail() {
       });
       actionsSection.appendChild(deleteButton);
     } else {
-      // Show bid form and wishlist button if user is not the listngs owner
       if (currentUser) {
         const bidForm = document.createElement('form');
-        bidForm.className = 'flex gap-3';
+        bidForm.className = 'flex flex-col gap-3 sm:flex-row';
 
         const bidInput = document.createElement('input');
         bidInput.type = 'number';
         bidInput.placeholder = 'Enter bid amount';
         bidInput.min = (currentBid + 1).toString();
         bidInput.className =
-          'flex-1 p-3 border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
+          'w-full flex-1 p-3 border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
         bidInput.required = true;
         bidForm.appendChild(bidInput);
 
         const bidButton = document.createElement('button');
         bidButton.type = 'submit';
         bidButton.className =
-          'px-6 py-3 bg-blue-slate-600 text-white rounded-lg font-semibold transition-all hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
+          'w-full px-6 py-3 whitespace-normal bg-blue-slate-600 text-white rounded-lg font-semibold transition-all hover:bg-blue-slate-700 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none sm:w-auto';
         bidButton.textContent = 'Place Bid';
         bidForm.appendChild(bidButton);
 
@@ -244,7 +243,6 @@ async function displayListingDetail() {
 
             await placeBid(listingId, bidAmount);
 
-            // Fetches and updates the profile with new credit count after bid
             const currentUser = getUser();
             const updatedProfile = await getProfile(currentUser.name);
 
@@ -289,9 +287,7 @@ async function displayListingDetail() {
         wishlistButton.className =
           'px-6 py-3 font-semibold transition-all bg-white border rounded-lg border-cool-steel-300 text-blue-slate-700 hover:bg-cool-steel-50';
         wishlistButton.textContent = '♥ Add to Wishlist';
-        wishlistButton.addEventListener('click', () => {
-          //---------------------------------------------------- TODOIF I HAVE TIME: Implement wishlist functionality
-        });
+        wishlistButton.addEventListener('click', () => {});
         actionsSection.appendChild(wishlistButton);
       }
     }
@@ -301,7 +297,6 @@ async function displayListingDetail() {
     contentGrid.appendChild(infoSection);
     container.appendChild(contentGrid);
 
-    // ---------------------------------------- Bidding History Section. will see if design should be different
     if (listing.bids && listing.bids.length > 0) {
       const historySection = document.createElement('div');
       historySection.className = 'mt-12';
@@ -328,7 +323,7 @@ async function displayListingDetail() {
           isHighest
             ? 'border-celadon-400 bg-celadon-50'
             : 'border-cool-steel-200 bg-white'
-        }`; // ------------------------------------------------------------------------------------FIX LATER. Tailwind npm run watch wont add
+        }`;
 
         const bidderInfo = document.createElement('div');
         bidderInfo.className = 'flex flex-col gap-1';
@@ -406,7 +401,6 @@ function showFormError(form, message) {
   error.textContent = message;
   form.appendChild(error);
 }
-//  --------------------------------------------------------------------TEST
 /**
  * Shows a delete confirmation modal
  * @param {string} listingId - The ID of the listing to delete
@@ -478,6 +472,6 @@ function showDeleteConfirmationModal(listingId) {
       document.body.removeChild(overlay);
     }
   });
-} // I am CONFUSED
+}
 
 displayListingDetail();

@@ -2,6 +2,7 @@ import { renderHeader } from '../components/header.js';
 import { renderFooter } from '../components/footer.js';
 import { renderNavbar } from '../components/navbar.js';
 import { createLogoBackground } from '../components/logoBackground.js';
+import { applyTheme } from './theme.js';
 
 /**
  * Initializes the page with common components
@@ -25,6 +26,7 @@ import { createLogoBackground } from '../components/logoBackground.js';
  * initializePage({ includeLogoBackground: true });
  */
 export function initializePage(options = {}) {
+  applyTheme();
   const { includeLogoBackground = false } = options;
 
   const body = document.querySelector('body');

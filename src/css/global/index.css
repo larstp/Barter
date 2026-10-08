@@ -1,6 +1,200 @@
-/* Sticky footer layout */
+@font-face {
+  font-family: 'Cabinet Grotesk';
+  src: url('../../../public/fonts/CabinetGrotesk-Variable.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.signup-marquee-track {
+  animation: signup-marquee 24s linear infinite;
+}
+
+.signup-marquee-group {
+  min-width: 100vw;
+}
+
+@keyframes signup-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-marquee-track {
+    animation: none;
+  }
+}
+
+body.home-page h1,
+body.home-page h2,
+body.listings-page h1,
+body.listings-page h2 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 600;
+}
+
+.login-icon {
+  display: block;
+  background-color: #456c78;
+  -webkit-mask: url('../../../public/icons/lucide_log-in.svg') center / contain
+    no-repeat;
+  mask: url('../../../public/icons/lucide_log-in.svg') center / contain
+    no-repeat;
+  transition: background-color 150ms ease;
+}
+
+.login-icon-link:hover .login-icon {
+  background-color: #6b8a94;
+}
+
+html.dark .login-icon {
+  background-color: #ffffff;
+}
+
+html.dark .login-icon-link:hover .login-icon {
+  background-color: #c4d0d4;
+}
+
+@media (min-width: 768px) {
+  .login-icon,
+  .login-icon-link:hover .login-icon {
+    background-color: #ffffff;
+  }
+}
+
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+:root {
+  --button-bg: #3f505a;
+  --button-hover: #2a363c;
+  --footer-bg: #e1e7ea;
+}
+
+html {
+  scrollbar-width: none;
+}
+
+html.dark body {
+  background-color: #151b1e;
+  color: #f0f3f4;
+}
+
+html.dark header {
+  background-color: #2a363c;
+  border-color: #556b77;
+}
+
+html.dark footer {
+  background-color: var(--footer-bg);
+}
+
+html footer {
+  background-color: var(--footer-bg);
+}
+
+html footer .text-cool-steel-700,
+html footer .text-cool-steel-600 {
+  color: #405359;
+}
+
+html.dark footer .text-cool-steel-700,
+html.dark footer .text-cool-steel-600 {
+  color: #ffffff;
+}
+
+html .bg-blue-slate-600,
+html .bg-blue-slate-700 {
+  background-color: var(--button-bg);
+  color: #ffffff;
+}
+
+html .hover\:bg-blue-slate-700:hover,
+html .hover\:bg-blue-slate-800:hover {
+  background-color: var(--button-hover);
+  color: #ffffff;
+}
+
+html.dark {
+  --button-bg: #556b77;
+  --button-hover: #6b8a94;
+  --footer-bg: #556b77;
+}
+
+html.dark .bg-white {
+  background-color: #2a363c;
+}
+
+html.dark input:not([type='checkbox']):not([type='radio']),
+html.dark textarea,
+html.dark select {
+  background-color: #2a363c;
+  border-color: #6b8a94;
+  color: #f0f3f4;
+  color-scheme: dark;
+}
+
+html.dark input:not([type='checkbox']):not([type='radio'])::placeholder,
+html.dark textarea::placeholder {
+  color: #a6b9bf;
+}
+
+html.dark input:not([type='checkbox']):not([type='radio']):focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: #84af83;
+  outline-color: #84af83;
+}
+
+html.dark option {
+  background-color: #2a363c;
+  color: #f0f3f4;
+}
+
+html.dark .bg-blue-slate-50,
+html.dark .bg-cool-steel-50,
+html.dark .bg-cool-steel-100,
+html.dark .bg-dust-grey-100 {
+  background-color: #3f505a;
+}
+
+html.dark .text-blue-slate-900,
+html.dark .text-blue-slate-700,
+html.dark .text-cool-steel-800,
+html.dark .text-cool-steel-700,
+html.dark .text-cool-steel-600 {
+  color: #f0f3f4;
+}
+
+html.dark .border-cool-steel-200,
+html.dark .border-cool-steel-300,
+html.dark .border-blue-slate-300 {
+  border-color: #6b8a94;
+}
+
+html.dark .hover\:bg-cool-steel-100:hover {
+  background-color: #556b77;
+}
+
+html.dark .listing-seller-link:hover {
+  background-color: #556b77;
+  color: #f0f3f4;
+}
+
+html.dark .listing-seller-name {
+  color: #f0f3f4;
+}
+
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-md {
+  --tw-shadow-color: #0f1315;
 }
