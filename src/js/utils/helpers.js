@@ -39,18 +39,13 @@ export function calculateTimeRemaining(endsAt) {
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000); // math is... not my strong suit
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  // --------------------------------------------------------Over 24 hours: show days + hours
   if (days > 0) {
     return `${days}d ${hours}h`;
-  }
-  //----------------------------------------------------- Less than 24 hours but more than 1 hour: show hours + minutes
-  else if (hours > 0) {
+  } else if (hours > 0) {
     return `${hours}h ${minutes}m`;
-  }
-  // ---------------------------------------------------------------------Less than 1 hour: show minutes + seconds
-  else {
+  } else {
     return `${minutes}m ${seconds}s`;
   }
 }
@@ -70,7 +65,6 @@ export function calculateTimeRemaining(endsAt) {
 export function startCountdown(endsAt, callback) {
   let intervalId;
 
-  // Call immediately! to avoid delay
   callback(calculateTimeRemaining(endsAt));
 
   function updateCountdown() {
@@ -81,13 +75,11 @@ export function startCountdown(endsAt, callback) {
 
     callback(timeString);
 
-    // Stop the interval if auction ends
     if (timeString === 'Auction ended') {
       clearInterval(intervalId);
       return;
     }
 
-    // ---------------------------------------If we just crossed the 1-hour threshold, restart with 1-second interval
     const oneHour = 60 * 60 * 1000;
     if (diff < oneHour && diff > oneHour - 60000) {
       clearInterval(intervalId);
@@ -95,8 +87,6 @@ export function startCountdown(endsAt, callback) {
     }
   }
 
-  //----------------------------------------------- Determine initial interval: 1 second if < 1 hour, 1 minute otherwise
-  // i feel like im doing something wrong with the intervals but it seems to work.
   const now = new Date();
   const end = new Date(endsAt);
   const diff = end - now;
@@ -148,27 +138,21 @@ export function resolvePath(targetPath) {
     ? targetPath.substring(1)
     : targetPath;
 
-  // ------------------------------------Check if we're on index.html (simple paths)
   const isOnIndexPage =
     window.location.pathname.endsWith('/index.html') ||
     window.location.pathname === '/' ||
     !window.location.pathname.includes('/src/pages/');
 
-  // -------------------------------If on index.html, paths are simple: just add ./
   if (isOnIndexPage) {
     return './' + cleanTarget;
   }
 
-  // Otherwise we're in src/pages/, need to adjust paths (i cnt believe how unnecessary this is but here we are)
-  // -------------------------------------------------------------- For index.html, go up two levels
   if (cleanTarget === 'index.html' || cleanTarget === '') {
     return '../../index.html';
   }
-  // --------------------------------------------------------- For other src/pages/, they're in same directory
   if (cleanTarget.startsWith('src/pages/')) {
     return './' + cleanTarget.replace('src/pages/', '');
   }
-  // --------------------------------------------------------   For public/, go up two levels
   if (cleanTarget.startsWith('public/')) {
     return '../../' + cleanTarget;
   }

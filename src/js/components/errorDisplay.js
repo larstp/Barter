@@ -97,8 +97,6 @@ export function clearError(container, id = 'error-message') {
   }
 }
 
-// This has to be here because of ONE annoying edge case
-
 /**
  * Clears an error from a container by ID
  * @param {string} containerId - The ID of the container element

@@ -57,7 +57,6 @@ export function renderFooter() {
     rightLinks.appendChild(createFooterLink(linkText));
   });
 
-  //    ------------------------------------------------------- Added  logout button for testing remove later!
   const logoutLink = document.createElement('span');
   logoutLink.className =
     'text-sm transition-colors cursor-pointer text-cool-steel-700 hover:text-blue-slate-700 hover:underline';
@@ -74,12 +73,17 @@ export function renderFooter() {
   const logoContainer = document.createElement('div');
   logoContainer.className = 'items-center justify-center hidden lg:flex';
 
-  const logo = document.createElement('img');
-  logo.src = resolvePath('public/img/logos/logo-text-black.svg');
-  logo.alt = 'Barter';
-  logo.className = 'h-16';
+  const lightLogo = document.createElement('img');
+  lightLogo.src = resolvePath('public/img/logos/logo-text-black.svg');
+  lightLogo.alt = 'Barter';
+  lightLogo.className = 'h-16 dark:hidden';
 
-  logoContainer.appendChild(logo);
+  const darkLogo = document.createElement('img');
+  darkLogo.src = resolvePath('public/img/logos/logo-text-white.svg');
+  darkLogo.alt = '';
+  darkLogo.className = 'hidden h-16 dark:block';
+
+  logoContainer.append(lightLogo, darkLogo);
 
   linksContainer.appendChild(leftLinks);
   linksContainer.appendChild(logoContainer);

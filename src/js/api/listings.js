@@ -1,6 +1,18 @@
 import { API_ENDPOINTS, PAGINATION_LIMITS } from '../utils/constants.js';
 import { getToken, getApiKey } from '../utils/storage.js';
+import { parseJson } from './response.js';
 
+/**
+ * Fetches a paginated list of listings.
+ * @param {number} [limit=21] - Number of listings per page.
+ * @param {number} [page=1] - Page number.
+ * @param {string} [tag=''] - Optional tag filter.
+ * @param {boolean} [active=true] - Whether to fetch active listings.
+ * @param {string} [sort='created'] - Sort field.
+ * @param {string} [sortOrder='desc'] - Sort direction.
+ * @returns {Promise<Object>} The listings response.
+ * @throws {Error} If listings cannot be fetched.
+ */
 export async function getListings(
   limit = PAGINATION_LIMITS.DEFAULT,
   page = 1,
@@ -26,7 +38,6 @@ export async function getListings(
     params.append('_active', active.toString());
   }
 
-  // -------------------------------------------Add sort parameters if works
   if (sort) {
     params.append('sort', sort);
   }
@@ -48,9 +59,15 @@ export async function getListings(
     throw new Error('Failed to fetch listings');
   }
 
-  return await response.json();
+  return parseJson(response);
 }
 
+/**
+ * Fetches one listing with seller and bid data.
+ * @param {string} id - The listing identifier.
+ * @returns {Promise<Object>} The listing response.
+ * @throws {Error} If the listing cannot be fetched.
+ */
 export async function getListing(id) {
   const apiKey = getApiKey();
 
@@ -68,9 +85,15 @@ export async function getListing(id) {
     throw new Error('Failed to fetch listing');
   }
 
-  return await response.json();
+  return parseJson(response);
 }
 
+/**
+ * Creates a listing for the authenticated user.
+ * @param {Object} listingData - The listing payload.
+ * @returns {Promise<Object>} The created listing response.
+ * @throws {Error} If the listing cannot be created.
+ */
 export async function createListing(listingData) {
   const token = getToken();
   const apiKey = getApiKey();
@@ -86,13 +109,20 @@ export async function createListing(listingData) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await parseJson(response);
     throw new Error(error.errors?.[0]?.message || 'Failed to create listing');
   }
 
-  return await response.json();
+  return parseJson(response);
 }
 
+/**
+ * Updates an existing listing.
+ * @param {string} id - The listing identifier.
+ * @param {Object} listingData - The updated listing payload.
+ * @returns {Promise<Object>} The updated listing response.
+ * @throws {Error} If the listing cannot be updated.
+ */
 export async function updateListing(id, listingData) {
   const token = getToken();
   const apiKey = getApiKey();
@@ -108,13 +138,19 @@ export async function updateListing(id, listingData) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await parseJson(response);
     throw new Error(error.errors?.[0]?.message || 'Failed to update listing');
   }
 
-  return await response.json();
+  return parseJson(response);
 }
 
+/**
+ * Deletes an existing listing.
+ * @param {string} id - The listing identifier.
+ * @returns {Promise<void>} A promise resolved after deletion.
+ * @throws {Error} If the listing cannot be deleted.
+ */
 export async function deleteListing(id) {
   const token = getToken();
   const apiKey = getApiKey();
@@ -132,6 +168,12 @@ export async function deleteListing(id) {
   }
 }
 
+/**
+ * Searches listings by query text.
+ * @param {string} query - The search query.
+ * @returns {Promise<Object>} The search response.
+ * @throws {Error} If the search request fails.
+ */
 export async function searchListings(query) {
   const apiKey = getApiKey();
   const headers = {};
@@ -149,5 +191,5 @@ export async function searchListings(query) {
     throw new Error('Failed to search listings');
   }
 
-  return await response.json();
+  return parseJson(response);
 }

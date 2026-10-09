@@ -5,7 +5,6 @@ import { createBackButton } from '../components/backButton.js';
 import { showErrorInContainer } from '../components/errorDisplay.js';
 import { resolvePath } from '../utils/helpers.js';
 
-// Check if user is logged in
 const user = getUser();
 if (!user) {
   window.location.href = resolvePath('src/pages/login.html');
@@ -46,7 +45,6 @@ function renderCreateListingForm() {
   );
   form.appendChild(titleGroup);
 
-  // -----------------------------------------------------------------Description field (optional)
   const descriptionGroup = createFormGroup(
     'description',
     'Description',
@@ -56,7 +54,6 @@ function renderCreateListingForm() {
   );
   form.appendChild(descriptionGroup);
 
-  // ------------------------------------------------------------------------End date field (required)
   const endDateGroup = createEndDateField();
   form.appendChild(endDateGroup);
 
@@ -138,7 +135,6 @@ function createEndDateField() {
   input.className =
     'p-3 border rounded-lg border-cool-steel-300 text-blue-slate-900 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
 
-  // ----------------------------------------------------------------- Set min to current tidspunkt
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   input.min = now.toISOString().slice(0, 16);
@@ -262,7 +258,6 @@ function createMediaSection() {
   addButton.addEventListener('click', () => addMediaField(mediaList));
   section.appendChild(addButton);
 
-  //  --------------------------------------------------- Add one media field by default (TEST!)
   addMediaField(mediaList);
 
   return section;
@@ -371,7 +366,6 @@ async function handleFormSubmit(event) {
 
     const response = await createListing(listingData);
 
-    // --------------------------------------------------------------------  Redirect to the newly created listing
     if (response.data?.id) {
       window.location.href =
         resolvePath('src/pages/listing-detail.html') +

@@ -3,6 +3,7 @@ import { getUser } from '../utils/storage.js';
 import { createLoader } from '../components/loader.js';
 import { initializePage } from '../utils/main.js';
 import { showErrorAfter } from '../components/errorDisplay.js';
+import { addPasswordToggle } from '../utils/passwordVisibility.js';
 
 initializePage({ includeLogoBackground: true });
 
@@ -71,7 +72,6 @@ function createLoginForm() {
   emailInput.title = 'Email must end with @stud.noroff.no';
   fieldsContainer.appendChild(emailInput);
 
-  // ----------------------------------------------------------------  Email validation feedback test
   emailInput.addEventListener('blur', () => {
     const value = emailInput.value.trim();
     if (value && value.endsWith('@stud.noroff.no')) {
@@ -84,7 +84,7 @@ function createLoginForm() {
       emailInput.setAttribute('aria-invalid', 'true');
     } else {
       emailInput.className =
-        'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-cool-steel-200 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200'; // i like tailwind but the long ones are very hard to read
+        'w-full p-4 text-base transition-all duration-300 bg-white border-2 rounded-lg border-cool-steel-200 text-blue-slate-900 placeholder:text-cool-steel-400 focus:outline-none focus:border-blue-slate-500 focus:ring-2 focus:ring-blue-slate-200';
       emailInput.removeAttribute('aria-invalid');
     }
   });
@@ -108,8 +108,8 @@ function createLoginForm() {
   passwordInput.title = 'Enter your password';
   passwordInput.setAttribute('aria-label', 'Password');
   fieldsContainer.appendChild(passwordInput);
+  addPasswordToggle(passwordInput);
 
-  // --------------------------------------------------------------- Password validation feedback test
   passwordInput.addEventListener('blur', () => {
     const value = passwordInput.value;
     if (value && value.length >= 8) {
@@ -136,7 +136,7 @@ function createLoginForm() {
   rememberCheckbox.type = 'checkbox';
   rememberCheckbox.id = 'remember';
   rememberCheckbox.name = 'remember';
-  rememberCheckbox.checked = true; // Default to checked is probably best, might change
+  rememberCheckbox.checked = true;
   rememberCheckbox.className =
     'w-4 h-4 bg-white border-2 rounded cursor-pointer text-blue-slate-600 border-cool-steel-300 focus:ring-2 focus:ring-blue-slate-200';
 
@@ -213,7 +213,6 @@ function createLoginForm() {
       fieldsContainer.insertAdjacentElement('afterend', successDiv);
 
       setTimeout(() => {
-        // ----------------------------------------------------Check for redirect parameter in URL test
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
 

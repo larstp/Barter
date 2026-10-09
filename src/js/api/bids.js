@@ -1,6 +1,14 @@
 import { API_ENDPOINTS } from '../utils/constants.js';
 import { getToken, getApiKey } from '../utils/storage.js';
+import { parseJson } from './response.js';
 
+/**
+ * Places a bid on a listing.
+ * @param {string} listingId - The listing identifier.
+ * @param {number} amount - The bid amount in credits.
+ * @returns {Promise<Object>} The bid response.
+ * @throws {Error} If the bid cannot be placed.
+ */
 export async function placeBid(listingId, amount) {
   const token = getToken();
   const apiKey = getApiKey();
@@ -19,9 +27,9 @@ export async function placeBid(listingId, amount) {
   );
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await parseJson(response);
     throw new Error(error.errors?.[0]?.message || 'Failed to place bid');
   }
 
-  return await response.json();
+  return parseJson(response);
 }

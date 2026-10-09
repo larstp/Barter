@@ -1,6 +1,52 @@
 import { getUser } from '../utils/storage.js';
 import { initializeSearch, openSearch } from './searchModal.js';
 import { resolvePath } from '../utils/helpers.js';
+import { getTheme, toggleTheme } from '../utils/theme.js';
+
+/**
+ * Creates the light/dark theme switch.
+ * @returns {HTMLButtonElement} The theme switch button.
+ */
+function createThemeToggle() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className =
+    'theme-toggle flex items-center gap-2 p-0 pr-2 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-celadon-400 lg:pr-0';
+  button.setAttribute('role', 'switch');
+  button.setAttribute('aria-label', 'Toggle dark mode');
+
+  const track = document.createElement('span');
+  track.className = 'relative flex items-center justify-center w-9 h-9';
+
+  const icon = document.createElement('img');
+  icon.className = 'w-5 h-5 dark:invert';
+  icon.alt = '';
+  track.appendChild(icon);
+
+  const label = document.createElement('span');
+  label.className = 'sr-only';
+  button.append(track, label);
+
+  const updateState = () => {
+    const isDark = getTheme() === 'dark';
+    button.setAttribute('aria-checked', String(isDark));
+    const nextThemeLabel = isDark ? 'light' : 'dark';
+    icon.src = resolvePath(
+      `public/icons/lucide_${isDark ? 'sun' : 'moon'}.svg`
+    );
+    icon.style.filter = isDark ? 'brightness(0) invert(1)' : 'none';
+    label.textContent = `Switch to ${nextThemeLabel} mode`;
+    button.title = `Switch to ${nextThemeLabel} mode`;
+  };
+
+  button.addEventListener('click', () => {
+    toggleTheme();
+    updateState();
+  });
+  updateState();
+
+  return button;
+}
 
 /**
  * Creates the credits display for mobile (icon + number)
@@ -60,7 +106,7 @@ function createLogoLink() {
   link.className = 'flex items-center justify-center lg:justify-start';
 
   const img = document.createElement('img');
-  img.src = resolvePath('public/img/logos/logo-65x65.svg');
+  img.src = resolvePath('public/img/logos/logo_full_circle.webp');
   img.alt = 'Barter Auction House';
   img.className = 'h-8';
 
@@ -84,7 +130,7 @@ function createProfileLink(user) {
   img.src = user.avatar.url;
   img.alt = user?.name || 'User profile';
   img.className =
-    'object-cover w-10 h-10 transition-colors border-2 rounded-full border-blue-slate-300 hover:border-blue-slate-500';
+    'object-cover w-10 h-10 transition-colors border-2 rounded-full bg-blue-slate-100 dark:bg-blue-slate-700 border-blue-slate-300 hover:border-blue-slate-500';
 
   link.appendChild(img);
 
@@ -99,12 +145,22 @@ function createLoginButton() {
   const link = document.createElement('a');
   link.href = resolvePath('src/pages/login.html');
   link.className =
-    'flex items-center justify-end transition-transform hover:scale-105';
+    'login-icon-link flex items-center justify-end transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-celadon-400';
+  link.setAttribute('aria-label', 'Log in');
 
   const button = document.createElement('span');
   button.className =
-    'px-4 py-2 text-sm font-semibold text-white transition-colors rounded-lg bg-blue-slate-700 hover:bg-blue-slate-800';
-  button.textContent = 'Log In';
+    'flex items-center gap-2 p-0 md:px-4 md:py-2 md:text-sm md:font-semibold md:text-white md:rounded-lg md:bg-blue-slate-700 md:hover:bg-blue-slate-800';
+
+  const icon = document.createElement('span');
+  icon.className = 'login-icon h-5 w-5';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'hidden md:inline';
+  text.textContent = 'Log In';
+
+  button.append(icon, text);
 
   link.appendChild(button);
 
@@ -142,22 +198,6 @@ function createAllAuctionsLink() {
 
   return link;
 }
-
-// TODO: Uncomment when wishlist feature is implemented
-// /**
-//  * Creates the wishlist link for desktop navigation (requires logged in user)
-//  * @returns {HTMLAnchorElement} Wishlist link
-//  */
-// function createWishlistLink() {
-//   const link = document.createElement('a');
-//   link.href = resolvePath('src/pages/wishlist.html');
-//   link.className =
-//     'px-4 py-2 text-sm font-medium transition-all text-blue-slate-700 hover:text-blue-slate-900 hover:scale-105';
-//   link.setAttribute('aria-label', 'Wishlist');
-//   link.textContent = 'Wishlist';
-//
-//   return link;
-// }
 
 /**
  * Creates the search button for desktop navigation
@@ -208,11 +248,8 @@ function createDesktopNav(user, isLoginPage) {
   const nav = document.createElement('nav');
   nav.className = 'items-center hidden gap-2 lg:flex';
 
+  nav.appendChild(createThemeToggle());
   nav.appendChild(createAllAuctionsLink());
-  // TODO: Uncomment when wishlist feature is implemented
-  // if (user) {
-  //   nav.appendChild(createWishlistLink());
-  // }
   nav.appendChild(createSearchButton());
   nav.appendChild(createNewAuctionButton(user));
 
@@ -232,7 +269,6 @@ function createDesktopNav(user, isLoginPage) {
  * @returns {HTMLElement} The header element
  */
 export function renderHeader() {
-  // Initialize search modal once with callback
   initializeSearch((query) => {
     window.location.href =
       resolvePath('src/pages/listings.html') +
@@ -267,6 +303,7 @@ export function renderHeader() {
 
   const mobileRight = document.createElement('div');
   mobileRight.className = 'flex items-center justify-end lg:hidden';
+  mobileRight.appendChild(createThemeToggle());
 
   if (user) {
     mobileRight.appendChild(createProfileLink(user));
@@ -278,7 +315,6 @@ export function renderHeader() {
 
   const desktopNav = createDesktopNav(user, isLoginPage);
 
-  // Mobile layout: credits (left) | logo (center) | profile/login (right)
   container.appendChild(mobileLeft);
   const mobileLogo = document.createElement('div');
   mobileLogo.className = 'flex items-center justify-center lg:hidden';
@@ -286,7 +322,6 @@ export function renderHeader() {
   container.appendChild(mobileLogo);
   container.appendChild(mobileRight);
 
-  // Desktop layout: logo + credits (left) | nav (right)
   container.appendChild(desktopLeft);
   container.appendChild(desktopNav);
 

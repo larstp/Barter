@@ -92,8 +92,6 @@ function renderEditListingForm(listing, listingId) {
   const form = document.createElement('form');
   form.className = 'flex flex-col gap-6';
 
-  // ------------------------------------------------------------ TEST pre filling by adding listing.title and listing.description to the createFormGroup function calls
-
   const titleGroup = createFormGroup(
     'title',
     'Title',
@@ -114,7 +112,6 @@ function renderEditListingForm(listing, listingId) {
   );
   form.appendChild(descriptionGroup);
 
-  //------------------------------- End date field (I missed that this was possible from the API docs until now)
   const endsAtDate = new Date(listing.endsAt);
   const formattedEndsAt = endsAtDate.toISOString().slice(0, 16);
   const endDateGroup = createFormGroup(

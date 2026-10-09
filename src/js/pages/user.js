@@ -1,4 +1,5 @@
-import { getProfile, getProfileBids } from '../api/profile.js'; // not sure if this is the right way bit it seems to work. sorry it is VERY messy
+import { getProfile, getProfileBids } from '../api/profile.js';
+import { getListing } from '../api/listings.js';
 import { getUser, clearStorage, saveUser } from '../utils/storage.js';
 import { initializePage } from '../utils/main.js';
 import { createLoader } from '../components/loader.js';
@@ -7,7 +8,6 @@ import { createBackButton } from '../components/backButton.js';
 import { showError } from '../components/errorDisplay.js';
 import { resolvePath } from '../utils/helpers.js';
 
-// Check if user is logged in, if not - straight to jail (login screen)
 const user = getUser();
 if (!user) {
   window.location.href = resolvePath('src/pages/login.html');
@@ -86,7 +86,6 @@ async function displayUserProfile() {
     backButton.className =
       'absolute z-10 flex items-center justify-center w-10 h-10 p-0 transition-all duration-200 ease-in-out border rounded-full cursor-pointer top-4 left-4 bg-black/50 backdrop-blur-md border-white/10 hover:bg-black/70 hover:scale-105';
 
-    // Override icon color to white for visibility on banner
     const backIcon = backButton.querySelector('img');
     if (backIcon) {
       backIcon.className = 'w-5 h-5 brightness-0 invert';
@@ -133,7 +132,7 @@ async function displayUserProfile() {
 
     const name = document.createElement('h1');
     name.className =
-      'inline-block px-3 py-1 m-0 text-2xl font-semibold rounded-md text-blue-slate-900 font-display bg-white/90 md:text-3xl';
+      'inline-block px-3 py-1 m-0 text-2xl font-semibold rounded-md text-blue-slate-900 dark:text-white font-display bg-white/90 dark:bg-blue-slate-800/90 md:text-3xl';
     name.textContent = profile.name;
     nameContainer.appendChild(name);
 
@@ -146,13 +145,12 @@ async function displayUserProfile() {
       info.appendChild(bio);
     }
 
-    // --------------------------------------Fetch bids data if viewing own profile to calculate pending wins
     let userBids = [];
     let pendingWins = [];
     if (currentUser?.name === profileName) {
       try {
         const bidsData = await getProfileBids(profileName, 100, 1);
-        const allBids = bidsData.data || [];
+        const allBids = await enrichBidsWithListings(bidsData.data || []);
         const now = new Date();
 
         const wonListingIds = new Set(
@@ -167,9 +165,6 @@ async function displayUserProfile() {
           const auctionEnded = new Date(bid.listing.endsAt) < now;
 
           if (auctionEnded) {
-            // I CANT get the API to confirm that an auction is won immediately after it ends, its been 13 hours now and a auction i won still isn't registered as so. Not sure if im doing something wrong, but all i get from the API is:
-            // Ended auction details: {title: 'Knights', yourBid: 55, allBidsOnListing: Array(0), bidsCount: 0}allBidsOnListing: []bidsCount: 0
-            //Which gives me no way to know if the auction was won or lost. maybe because _bids: 'true' on the profile bids endpoint doesn't expand nested bids on the listing object, bot i dont know nearly enough to troubleshoot this. Currently the win tabs count all 'potential' wins.
             pendingWins.push(bid.listing);
           } else {
             userBids.push(bid);
@@ -257,7 +252,6 @@ async function displayUserProfile() {
       },
     ];
 
-    // -----------------------------------------------------Only show "Current Bids" tab if viewing own profile. TEST WITH OTHER PROFILES TO MAKE SURE IT DISAPPEARS WHY AM I SHOUTING?
     if (currentUser?.name === profileName) {
       tabs.push({
         id: 'bids',
@@ -290,14 +284,12 @@ async function displayUserProfile() {
 
     listingsSection.appendChild(tabNav);
 
-    //  container
     const contentContainer = document.createElement('div');
     contentContainer.id = 'tab-content';
     listingsSection.appendChild(contentContainer);
 
     main.appendChild(listingsSection);
 
-    // -----------------------------Show initial tab content (listings) as start tab
     showTabContent('listings', profile, userBids, pendingWins);
 
     if (currentUser?.name === profileName) {
@@ -329,6 +321,37 @@ async function displayUserProfile() {
 }
 
 /**
+ * Replaces nested profile-bid listings with full listing data so bid status
+ * uses the complete authoritative bid history.
+ * @param {Array} bids - The profile bid records.
+ * @returns {Promise<Array>} Bid records with enriched listing data.
+ */
+async function enrichBidsWithListings(bids) {
+  const listingIds = [
+    ...new Set(bids.map((bid) => bid.listing?.id).filter(Boolean)),
+  ];
+  const listingDetails = new Map();
+
+  await Promise.all(
+    listingIds.map(async (listingId) => {
+      try {
+        const response = await getListing(listingId);
+        if (response.data) {
+          listingDetails.set(listingId, response.data);
+        }
+      } catch (error) {
+        console.error(`Error fetching listing ${listingId}:`, error);
+      }
+    })
+  );
+
+  return bids.map((bid) => ({
+    ...bid,
+    listing: listingDetails.get(bid.listing?.id) || bid.listing,
+  }));
+}
+
+/**
  * Shows the content for the selected tab
  * @param {string} tabId - The ID of the tab to show
  * @param {Object} profile - The profile data
@@ -345,18 +368,15 @@ function showTabContent(tabId, profile, userBids, pendingWins = []) {
 
   if (tabId === 'listings') {
     if (profile.listings && profile.listings.length > 0) {
-      // ----------------active listings first, then expired ones (newest to oldest in each group) (super messy, but too exhausted)
       const sortedListings = [...profile.listings].sort(
         (listing1, listing2) => {
           const now = new Date();
           const listing1Expired = new Date(listing1.endsAt) < now;
           const listing2Expired = new Date(listing2.endsAt) < now;
 
-          // ------------------------------If one is expired and one is active, active comes first
           if (listing1Expired && !listing2Expired) return 1;
           if (!listing1Expired && listing2Expired) return -1;
 
-          // -------------------------------------------If both same status, sort newest first
           return new Date(listing2.created) - new Date(listing1.created);
         }
       );
@@ -375,7 +395,6 @@ function showTabContent(tabId, profile, userBids, pendingWins = []) {
       showEmptyState(contentContainer, 'No active listings');
     }
   } else if (tabId === 'wins') {
-    // Combine official wins from API with pending wins calculated client-side
     const allWins = [...(profile.wins || []), ...pendingWins];
 
     if (allWins.length > 0) {
@@ -394,7 +413,6 @@ function showTabContent(tabId, profile, userBids, pendingWins = []) {
     }
   } else if (tabId === 'bids') {
     if (userBids && userBids.length > 0) {
-      // ------------------------------------------------------- Group bids by listing ID to avoid dupes
       const uniqueBids = new Map();
 
       userBids.forEach((bid) => {
@@ -433,7 +451,6 @@ function createBidListingCard(bid) {
   const listing = bid.listing;
   const card = createListingCard(listing);
 
-  //------------------------------------------  is user winning? (had help with this from full stack friend)
   const allBids = listing.bids || [];
   const highestBid =
     allBids.length > 0 ? Math.max(...allBids.map((b) => b.amount)) : 0;
@@ -441,7 +458,7 @@ function createBidListingCard(bid) {
   const isWinning = userBid >= highestBid;
 
   const indicator = document.createElement('div');
-  indicator.className = `absolute top-0 left-0 right-0 px-4 py-2 text-sm font-semibold text-white ${
+  indicator.className = `w-full px-4 py-2 text-sm font-semibold text-white ${
     isWinning ? 'bg-celadon-600' : 'bg-petal-frost-600'
   }`;
   indicator.textContent = isWinning ? '✓ Winning bid' : '⚠ Outbid';
@@ -478,7 +495,6 @@ function showEmptyState(container, message) {
  * @param {number} credits - The new credits count
  */
 function updateHeaderCredits(credits) {
-  //------------------------------------------------- Find all credit text elements in the header (mobile and desktop)
   const header = document.querySelector('header');
   if (!header) return;
 

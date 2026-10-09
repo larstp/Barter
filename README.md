@@ -16,28 +16,30 @@
 - [Project Links](#project-links)
 - [Brand Story](#brand-story)
 
-[2. Setup & Installation](#2-setup--installation)
+[2. Assignment Specifics](#2-assignment-specifics)
 
-[3. User](#3-user)
+[3. Setup & Installation](#3-setup--installation)
+
+[4. User](#4-user)
 
 - [Login User](#login-user)
 - [Creating Your Own User](#creating-your-own-user)
 
-[4. Technologies Used](#4-technologies-used)
+[5. Technologies Used](#5-technologies-used)
 
-[5. Folder Structure](#5-folder-structure)
+[6. Folder Structure](#6-folder-structure)
 
-[6. Features](#6-features)
+[7. Features](#7-features)
 
-[7. Accessibility and SEO](#7-accessibility--seo)
+[8. Accessibility and SEO](#8-accessibility--seo)
 
-[8. Known Issues & Limitations](#8-known-issues--limitations)
+[9. Known Issues & Limitations](#9-known-issues--limitations)
 
-[9. Semester Project 2 Assignment](#9-semester-project-2-assignment)
+[10. Development History](#10-development-history)
 
-[10. Credits](#10-credits)
+[11. Credits](#11-credits)
 
-[11. Contact](#11-contact)
+[12. Contact](#12-contact)
 
 </details>
 
@@ -45,7 +47,9 @@
 
 ## 1. Project Overview
 
-Barter is a modern auction house platform built as part of the Semester Project 2 assignment at NOROFF. The platform allows users to create listings, place bids, manage their profiles, and participate in real-time auctions with a credit-based system.
+Barter is a modern, responsive auction house platform built as part of the Semester Project 2 assignment at NOROFF. The platform allows users to create listings, place bids, manage their profiles, and participate in auctions using a credit-based system.
+
+The project was later refined for the POR2 portfolio assignment, with a focus on visual polish, responsive behavior, accessibility, and clearer user feedback.
 
 ### Brand Story
 
@@ -58,7 +62,40 @@ Barter is a modern auction house platform built as part of the Semester Project 
 
 ---
 
-## 2. Setup & Installation
+## 2. Assignment Specifics
+
+### Semester Project 2
+
+Barter was created for the NOROFF Semester Project 2 assignment. The brief required a student-only auction application integrated with the Noroff Auction House API. Visitors should be able to browse and search listings, while registered users should be able to manage profiles, create listings, and participate in bidding with virtual credits.
+
+The project demonstrates:
+
+- Vanilla JavaScript and DOM manipulation without a front-end framework.
+- REST API integration with the Noroff v2 Auction House API.
+- User registration and authentication using `@stud.noroff.no` email addresses.
+- Listing creation, editing, deletion, browsing, searching, and filtering.
+- Profile management, credits, bidding, and bid history.
+- Responsive and accessible interfaces for desktop and mobile users.
+- Tailwind CSS for utility-based styling.
+
+### POR2
+
+The POR2 assignment focused on improving selected previous projects so they could be presented professionally in a portfolio. For Barter, this included addressing lecturer feedback, improving maintainability, refining responsive behavior, adding a user-controlled dark mode, and polishing the visual presentation.
+
+POR2 improvements include:
+
+- Added persistent light/dark mode with a header toggle and theme-aware logos.
+- Added responsive login icons, improved mobile controls, and removed the navigation flash during theme changes.
+- Added Cabinet Grotesk typography to Home and Listings headings.
+- Added clearer Home page copy, highest-bid information, auction section subheadings, and a logged-out signup marquee.
+- Improved dark-mode form controls, labels, footer styling, profile avatars, and hover states.
+- Added password visibility controls and confirm-password validation to registration.
+- Improved Current Bids winner/outbid indicators and mobile bid-form layout.
+- Improved mobile spacing and responsive presentation throughout the application.
+
+---
+
+## 3. Setup & Installation
 
 ### Prerequisites
 
@@ -86,7 +123,7 @@ deployment configuration is stored in `vercel.json`.
 
 ---
 
-## 3. User
+## 4. User
 
 ### Login User:
 
@@ -111,18 +148,19 @@ You can create a test user or use an existing account.
 
 ---
 
-## 4. Technologies Used
+## 5. Technologies Used
 
 - **HTML5** - Semantic markup with comprehensive form validation
 - **Tailwind CSS** - Utility-first CSS framework with custom color palette
 - **JavaScript ES6+** - Modules
-- **GitHub Pages** - Hosting
-- **Flowbite Icons** - SVG icon library
+- **Vercel** - Hosting and deployment
+- **Flowbite Icons and Lucide Icons** - SVG icon libraries
+- **Cabinet Grotesk** - Variable display font used for Home and Listings headings
 - **npm** - Package management and build scripts
 
 ---
 
-## 5. Folder Structure
+## 6. Folder Structure
 
 ```
 /
@@ -133,8 +171,9 @@ You can create a test user or use an existing account.
 ├── src/
 │   ├── css/
 │   │   ├── global/     # Global styles
-│   │   ├── input.css   # Tailwind source file
-│   │   └── output.css  # Generated Tailwind output
+│   │   ├── tailwind.input.css # Tailwind source file
+│   │   ├── tailwind.css       # Generated Tailwind output
+│   │   └── global/            # Global styles and theme rules
 │   ├── js/
 │   │   ├── api/        # API integration (auth, listings, bids, profile)
 │   │   ├── components/ # Reusable components (header, footer, cards, etc.)
@@ -150,7 +189,7 @@ You can create a test user or use an existing account.
 
 ---
 
-## 6. Features
+## 7. Features
 
 ### Core Functionality:
 
@@ -191,7 +230,7 @@ You can create a test user or use an existing account.
 
 ---
 
-## 7. Accessibility & SEO
+## 8. Accessibility & SEO
 
 ### Accessibility:
 
@@ -213,7 +252,7 @@ You can create a test user or use an existing account.
 
 ---
 
-## 8. Known Issues / Limitations
+## 9. Known Issues / Limitations
 
 - **Wins API Delay** - API can take hours to process won auctions, client-side logic displays ended auctions immediately
 - **Bid Count Sorting** - API doesn't support sorting by bid count, handled client-side with limited dataset
@@ -223,22 +262,29 @@ You can create a test user or use an existing account.
 
 ---
 
-## 9. Semester Project 2 Assignment
+## 10. Development History
 
-This project was developed as part of the Semester Project 2 at NOROFF School of Technology and Digital Media, demonstrating:
+The project has been developed in stages as part of the NOROFF School of Technology and Digital Media coursework:
 
-- Front-end development with vanilla JavaScript
-- API integration with RESTful endpoints
-- Responsive design with Tailwind CSS
-- User authentication and authorization
-- Complex state management
-- Form validation and error handling
-- CRUD operations
-- Time-based functionality (auction countdowns)
+### Semester Project 2
+
+- Front-end development with vanilla JavaScript.
+- API integration with the Noroff Auction House API.
+- User authentication and authorization.
+- Listing CRUD operations, bidding, and auction countdowns.
+- Responsive design, form validation, and error handling.
+
+### POR2
+
+- Visual refinement for portfolio presentation.
+- User-controlled dark mode and theme-aware assets.
+- Improved responsive forms, navigation, typography, copy, and auction status feedback.
+
+Further lecturer-feedback refactoring is being maintained separately on the `feedback-fixes` branch and is not part of the POR2 hand-in branch.
 
 ---
 
-## 10. Credits
+## 11. Credits
 
 ### Icons:
 
@@ -248,6 +294,7 @@ This project was developed as part of the Semester Project 2 at NOROFF School of
 
 - [Montserrat](https://fonts.google.com/specimen/Montserrat) - Display font
 - [Roboto](https://fonts.google.com/specimen/Roboto) - Body font
+- Cabinet Grotesk - Variable heading font used on Home and Listings
 
 ### Tools & Resources:
 
@@ -263,7 +310,7 @@ This project was developed as part of the Semester Project 2 at NOROFF School of
 
 ---
 
-## 11. Contact
+## 12. Contact
 
 - **Author**: [larstp](https://github.com/larstp)
 - **Course**: Semester Project 2 - NOROFF School of Technology and Digital Media

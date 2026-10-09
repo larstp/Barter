@@ -16,8 +16,6 @@ export const API_AUCTION_BASE = `${API_BASE_URL}/auction`;
  */
 export const API_AUTH_BASE = `${API_BASE_URL}/auth`;
 
-// To any lecturers; i hope its ok to store these here for ease of use. I can move them if needed.
-
 /**
  * Collection of all API endpoints used in the application
  * @constant {Object}

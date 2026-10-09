@@ -55,7 +55,8 @@ async function displayEditProfile() {
     form.setAttribute('aria-label', 'Edit profile form');
 
     const bioLabel = document.createElement('label');
-    bioLabel.className = 'block mb-2 text-sm font-semibold text-blue-slate-800';
+    bioLabel.className =
+      'block mb-2 text-sm font-semibold text-blue-slate-800 dark:text-white';
     bioLabel.textContent = 'Bio';
     bioLabel.setAttribute('for', 'bio');
     form.appendChild(bioLabel);
@@ -73,7 +74,7 @@ async function displayEditProfile() {
 
     const avatarLabel = document.createElement('label');
     avatarLabel.className =
-      'block mb-2 text-sm font-semibold text-blue-slate-800';
+      'block mb-2 text-sm font-semibold text-blue-slate-800 dark:text-white';
     avatarLabel.textContent = 'Avatar URL (optional)';
     avatarLabel.setAttribute('for', 'avatar');
     form.appendChild(avatarLabel);
@@ -91,7 +92,7 @@ async function displayEditProfile() {
 
     const bannerLabel = document.createElement('label');
     bannerLabel.className =
-      'block mb-2 text-sm font-semibold text-blue-slate-800';
+      'block mb-2 text-sm font-semibold text-blue-slate-800 dark:text-white';
     bannerLabel.textContent = 'Banner URL (optional)';
     bannerLabel.setAttribute('for', 'banner');
     form.appendChild(bannerLabel);
@@ -113,7 +114,7 @@ async function displayEditProfile() {
     const cancelButton = document.createElement('a');
     cancelButton.href = resolvePath('src/pages/user.html');
     cancelButton.className =
-      'flex-1 p-4 bg-white text-blue-slate-800 border border-cool-steel-300 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 inline-block text-center no-underline hover:bg-petal-frost-600 hover:text-white hover:border-petal-frost-600 hover:-translate-y-0.5 active:translate-y-0';
+      'flex-1 p-4 bg-white text-blue-slate-800 dark:bg-blue-slate-700 dark:text-white border border-cool-steel-300 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 inline-block text-center no-underline hover:bg-petal-frost-600 hover:text-white hover:border-petal-frost-600 dark:hover:bg-petal-frost-600 dark:hover:text-white dark:hover:border-petal-frost-600 hover:-translate-y-0.5 active:translate-y-0';
     cancelButton.textContent = 'Cancel';
     buttonsContainer.appendChild(cancelButton);
 
@@ -173,7 +174,6 @@ async function displayEditProfile() {
           const updatedProfileResponse = await getProfile(currentUser.name);
           const updatedProfile = updatedProfileResponse.data;
 
-          // -------------------------------------------------------- Merge with existing user data and save. Needs TESTING
           const remember = localStorage.getItem('token') ? true : false;
           const updatedUser = {
             ...currentUser,
