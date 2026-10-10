@@ -43,6 +43,49 @@
 
 </details>
 
+<details>
+  <summary>Project Screenshots</summary>
+
+  <table>
+    <tr>
+      <td align="center">
+        <img src="public/img/screenshots/barter-hero.webp" alt="Barter home page hero" width="360" />
+        <br />
+        <sub>Home page hero</sub>
+      </td>
+      <td align="center">
+        <img src="public/img/screenshots/barter-auctions.webp" alt="Barter auctions page" width="360" />
+        <br />
+        <sub>Auctions overview</sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="public/img/screenshots/barter-listing-cards.webp" alt="Barter listing cards" width="360" />
+        <br />
+        <sub>Listing cards</sub>
+      </td>
+      <td align="center">
+        <img src="public/img/screenshots/barter-bidding-cards.webp" alt="Barter bidding cards" width="360" />
+        <br />
+        <sub>Current bids and bid status</sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="public/img/screenshots/barter-auction-specific.webp" alt="Barter listing detail page" width="360" />
+        <br />
+        <sub>Listing details and bidding</sub>
+      </td>
+      <td align="center">
+        <img src="public/img/screenshots/barter-user.webp" alt="Barter user profile page" width="360" />
+        <br />
+        <sub>User profile</sub>
+      </td>
+    </tr>
+  </table>
+</details>
+
 ---
 
 ## 1. Project Overview
